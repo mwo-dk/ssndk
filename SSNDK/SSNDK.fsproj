@@ -7,7 +7,7 @@
     <Company>-</Company>
     <Description>A simple package to work with danish social security numbers</Description>
     <Copyright>Michael W. Olesen</Copyright>
-    <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/mwo-dk/ssndk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mwo-dk/ssndk</RepositoryUrl>
     <PackageTags>social security number danish</PackageTags>
@@ -18,6 +18,11 @@
     <Compile Include="Extensions.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\MIT.md" Pack="true" PackagePath="LICENSE.md" />
+
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.2" />
   </ItemGroup>
