@@ -133,9 +133,9 @@ type StringExtensions() =
   /// </summary>
   /// <param name="useModula11Check">Flag telling whether to utilize modula 11 check. Defaults to fals</param>
   [<Extension>]
-  static member Validate(x, [<Optional; DefaultParameterValue(false)>] ?useModula11Check)  =
+  static member Validate(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check)  =
     let modula11Check = defaultArg useModula11Check false
-    match x |> validate modula11Check with
+    match ssn |> validate modula11Check with
     | SSNDK.ValidationResult.Ok -> ValidationOkResult() :> ValidationResult
     | SSNDK.ValidationResult.Error reason -> ValidationErrorResult(reason |> toError) :> ValidationResult
   /// <summary>
@@ -144,10 +144,10 @@ type StringExtensions() =
   /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
   /// <param name="repairBirthDate">Flag telling whether to repair the day in the month. Defauls to true</param>
   [<Extension>]
-  static member GetPerson(x, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairBirthDate) =
+  static member GetPerson(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairBirthDate) =
     let modula11Check = defaultArg useModula11Check false
     let repair = defaultArg repairBirthDate true
-    match x |> getPersonInfo modula11Check  repair with
+    match ssn |> getPersonInfo modula11Check  repair with
     | SSNResult.Ok person -> SSNOkResult(PersonInfo(person.Gender |> toGender, person.DateOfBirth)) :> SSNResult
     | SSNResult.Error reason -> SSNErrorResult(reason |> toError) :> SSNResult
   /// <summary>
@@ -155,9 +155,9 @@ type StringExtensions() =
   /// </summary>
   /// <param name="useModula11Check">Flag telling 
   [<Extension>]
-  static member ValidateAndThrow(x, [<Optional; DefaultParameterValue(false)>] ?useModula11Check)  =
+  static member ValidateAndThrow(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check)  =
     let modula11Check = defaultArg useModula11Check false
-    match x |> validate modula11Check with
+    match ssn |> validate modula11Check with
     | SSNDK.ValidationResult.Ok -> ValidationOkResult()
     | SSNDK.ValidationResult.Error reason -> reason |> toException |> raise
   /// <summary>
@@ -166,9 +166,9 @@ type StringExtensions() =
   /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
   /// <param name="repairBirthDate">Flag telling whether to repair the day in the month. Defauls to true</
   [<Extension>]
-  static member GetPersonAndThrow(x, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairBirthDate) =
+  static member GetPersonAndThrow(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairBirthDate) =
     let modula11Check = defaultArg useModula11Check false
     let repair = defaultArg repairBirthDate true
-    match x |> getPersonInfo modula11Check  repair with
+    match ssn |> getPersonInfo modula11Check  repair with
     | SSNResult.Ok person -> SSNOkResult(PersonInfo(person.Gender |> toGender, person.DateOfBirth))
     | SSNResult.Error reason -> reason |> toException |> raise
