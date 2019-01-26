@@ -2,7 +2,7 @@
 
 A minor package that helps working with danish social security numbers. The library is written in F#, but convenient C#-friendly extensions have been provided as well.
 
-Simply install the package ssndk
+Simply install the package ssndk from [nuget.org](https://www.nuget.org/packages/SSNDK)
 
 Danish social security numbers are strings, that usually are represented as either ```DDMMYYNNNN``` or ```DDMMYY-NNNN```, where:
 
