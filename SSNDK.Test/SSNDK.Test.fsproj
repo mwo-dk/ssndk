@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -8,18 +8,43 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="TestHelpers.fs" />
+    <Compile Include="getIndicesTest.fs" />
+    <Compile Include="allIntsTest.fs" />
+    <Compile Include="toIntTest.fs" />
+    <Compile Include="sumOfProductTest.fs" />
+    <Compile Include="modula11OfTest.fs" />
+    <Compile Include="isModula11Test.fs" />
+    <Compile Include="getDDTest.fs" />
+    <Compile Include="getMMTest.fs" />
+    <Compile Include="getYYTest.fs" />
+    <Compile Include="getControlCodeTest.fs" />
+    <Compile Include="getBirthYearTest.fs" />
+    <Compile Include="getGenderTest.fs" />
+    <Compile Include="validate_Test.fs" />
+    <Compile Include="validateTest.fs" />
+    <Compile Include="getPersonInfoTest.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
+  <ItemGroup />
+
   <ItemGroup>
+    <PackageReference Include="FsCheck.Xunit" Version="2.13.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SSNDK\SSNDK.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.4" />
   </ItemGroup>
 
 </Project>
