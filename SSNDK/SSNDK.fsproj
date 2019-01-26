@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Authors>Michael W. Olesen</Authors>
+    <Company>-</Company>
+    <Description>A simple package to work with danish social security numbers</Description>
+    <Copyright>Michael W. Olesen</Copyright>
+    <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/mwo-dk/ssndk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mwo-dk/ssndk</RepositoryUrl>
+    <PackageTags>social security number danish</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

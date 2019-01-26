@@ -170,29 +170,29 @@ module internal Helpers =
   | Ok of int*int*int     // first non-space character position, last ditto and control number
   | Error of ErrorReason
 
-  let validate' useModula11Check x =
-    match getIndices x with
+  let validate' useModula11Check ssn =
+    match getIndices ssn with
     | Some first, Some last ->
       let length = last-first+1
       match length with 
       | 10 ->
-        if x |> allInts first last |> not then Error NonDigitCharacters
+        if ssn |> allInts first last |> not then Error NonDigitCharacters
         else
           if useModula11Check &&
-            x |> sumOfProduct [|first .. first + 9|] |> 
+            ssn |> sumOfProduct [|first .. first + 9|] |> 
               isModula11 |> not then Error Modula11CheckFail
           else
-            Ok (first, last, x |> getControlCode first false)
+            Ok (first, last, ssn |> getControlCode first false)
       | 11 ->
-        if x |> allInts first (first + 5) |> not || 
-          x |> allInts (first + 7) last |> not then Error NonDigitCharacters
-        else if x.[first + 6] <> '-' then Error NonDashCharacter
+        if ssn |> allInts first (first + 5) |> not || 
+          ssn |> allInts (first + 7) last |> not then Error NonDigitCharacters
+        else if ssn.[first + 6] <> '-' then Error NonDashCharacter
         else 
           if useModula11Check &&
-            x |> sumOfProduct [|for n in first .. first + 9 do yield if n - first <= 5 then n else n + 1|] |> 
+            ssn |> sumOfProduct [|for n in first .. first + 9 do yield if n - first <= 5 then n else n + 1|] |> 
               isModula11 |> not then Error Modula11CheckFail
           else 
-            Ok (first, last, x |> getControlCode first true)
+            Ok (first, last, ssn |> getControlCode first true)
       | _ -> Error InvalidLength
     | _ -> Error NullEmptyOrWhiteSpace
     
@@ -204,8 +204,8 @@ type ValidationResult =
 | Error of ErrorReason                     // The validation failed
 
 /// https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf
-let validate useModula11Check x =
-  match x |> validate' useModula11Check with
+let validate useModula11Check ssn =
+  match ssn |> validate' useModula11Check with
   | Helpers.Ok _ -> Ok
   | Helpers.Error reason -> Error reason
 
@@ -229,11 +229,11 @@ type SSNResult =
 /// </summary>
 /// <param name="useModula11Check">Flag telling whether to utilize the modula 11 check</param>
 /// <param name="repairDateOfBirth">Tlag telling whether to repair day in month</param>
-/// <param name="x">The SSN string</param>
-let getPersonInfo useModula11Check repairDateOfBirth x =
-  match x |> validate' useModula11Check with
+/// <param name="ssn">The SSN string</param>
+let getPersonInfo useModula11Check repairDateOfBirth ssn =
+  match ssn |> validate' useModula11Check with
   | Helpers.Ok (first, last, controlCode) ->
-    let (dd, mm, yy) = (x |> getDD first, x |> getMM first, x |> getYY first)
+    let (dd, mm, yy) = (ssn |> getDD first, ssn |> getMM first, ssn |> getYY first)
     match getBirthYear yy controlCode with
     | YearOfBirth.Ok year ->
       if dd < 0 || 99 < dd then Error InvalidDayInMonth
@@ -244,7 +244,7 @@ let getPersonInfo useModula11Check repairDateOfBirth x =
           let daysInMonth = DateTime.DaysInMonth(year, mm)
           if daysInMonth < dd' then Error InvalidDayInMonth
           else 
-            let gender = x.[last] |> getGender
+            let gender = ssn.[last] |> getGender
             Ok {Gender = gender; DateOfBirth = DateTimeOffset(year, mm, dd', 0, 0, 0, TimeSpan.Zero)}
     | YearOfBirth.Error reason -> Error reason 
   | Helpers.Error reason -> Error reason
