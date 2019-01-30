@@ -17,17 +17,11 @@ type ErrorReason =
 | Modula11CheckFail                  // The modula 11 check failed
 | InvalidLength                      // The trimmed range has invalid length
 | InvalidDayInMonth                  // The given day in the month is invalid
+| InvalidMonth                       // The given month is invalid
 | InvalidYear                        // The year is invalid
 | InvalidControl                     // The control number is invalid
 | InvalidYearAndControl              // The year and control numbers are invalid
 | InvalidYearAndControlCombination   // Essential unexpected error
-
-/// <summary>
-/// Represents the outcome of the computation of year of birth
-/// </summary>
-type YearOfBirth =
-| Ok of int                          // The year of birth is ok and is included
-| Error of ErrorReason               // The year of birth is wrong
 
 /// <summary>
 /// Represents the gender of a person
@@ -39,26 +33,58 @@ type Gender =
 [<AutoOpen>]
 module internal Helpers =
   /// <summary>
+  /// The space character
+  /// </summary>
+  let space = ' '
+
+  /// <summary>
+  /// Determines if a given character is a space
+  /// </summary>
+  /// <param name="x">The character to categorize</param>
+  let isSpace x = x = space
+
+  /// <summary>
+  /// Represents a pair of cursors around a string, that needs to be trimmed
+  /// </summary>
+  type CursorPair =
+  | Unknown
+  | Known of int*int
+
+  /// <summary>
+  /// Determines the cursor pair (inclusive) around a string, that needs to be trimmed
+  /// </summary>
+  /// <param name="n"></param>
+  /// <param name="cursors"></param>
+  /// <param name="x"></param>
+  let rec getRange n cursors x = 
+    match x with
+    | [] -> cursors
+    | [x] ->
+      match cursors with
+      | Known (first, last) ->
+        if x |> isSpace then cursors
+        else Known (first, n)
+      | _ -> Unknown
+    | x::xs  ->
+      match cursors with
+      | Known (first, last) ->
+        if x |> isSpace then getRange (n+1) cursors xs
+        else getRange (n+1) (Known(first, n)) xs
+      | _ -> 
+        if x |> isSpace then getRange (n+1) Unknown xs
+        else getRange (n+1) (Known(n, n)) xs
+
+  /// <summary>
   /// Computes the range of valid character indices - instead of allocating new string when trimming
   /// </summary>
   /// <param name="x">The string to "trim"</param>
   let getIndices x =
-    if (String.IsNullOrWhiteSpace(x)) then (None, None)
-    else 
-      let length = x.Length
-      let mutable first : int option = None
-      let mutable last : int option = None
-      {0..length-1} |> Seq.iter 
-        (fun n -> 
-          if ' ' <> x.[n] then 
-            if first.IsNone then first <- Some n
-            last <- Some n
-          )
-      (first, last)
+    if String.IsNullOrWhiteSpace(x) then Unknown
+    else x.ToCharArray() |> List.ofArray |> getRange 0 Unknown
   
   /// <summary>
   /// Determines whether all characters in the provided string <paramref name="x"/> given by the
-  /// range [<paramref name="first"/>;<paramref name="last"/>] contains only characters
+  /// range <paramref name="first"/>;<paramref name="last"/> contains only characters
   /// </summary>
   /// <param name="first">The index of the first character</param>
   /// <param name="last">The index of the last character</param>
@@ -109,18 +135,21 @@ module internal Helpers =
   /// <param name="first">First non-space character</param>
   /// <param name="x">The source string</param>
   let getDD first (x: string) = 10 * (toInt x.[first]) + (toInt x.[first + 1])
+
   /// <summary>
   /// Extracts the raw 'mm' (month) of the birthday part of the string
   /// </summary>
   /// <param name="first">First non-space character</param>
   /// <param name="x">The source string</param>
   let getMM first (x: string) = 10 * (toInt x.[first + 2]) + (toInt x.[first + 3])
+
   /// <summary>
   /// Extracts the raw 'y' (year) of the birthday part of the string
   /// </summary>
   /// <param name="first">First non-space character</param>
   /// <param name="x">The source string</param>
   let getYY first (x: string) = 10 * (toInt x.[first + 4]) + (toInt x.[first + 5])
+
   /// <summary>
   /// Extracts the control value of the string
   /// </summary>
@@ -129,8 +158,15 @@ module internal Helpers =
   /// <param name="x">The source string</param>
   let getControlCode first hasDash (x: string) =
     let offSet = if hasDash then 7 else 6
-    [|first + offSet..first + offSet+3|] |> Array.fold (fun acc n -> 10*acc + (toInt x.[n])) 0
-    
+    [|first + offSet..first + offSet+3|] |> Array.fold (fun acc n -> 10*acc + (toInt x.[n])) 0  
+
+  /// <summary>
+  /// Represents the outcome of the computation of year of birth
+  /// </summary>
+  type YearOfBirth =
+  | YearOfBirthSuccess of int               // The year of birth is ok and is included
+  | YearOfBirthError of ErrorReason  // The year of birth is wrong
+
   /// <summary>
   /// Computes the year of birth according to the rules set up in
   /// https://www.cpr.dk/media/17534/personnummeret-i-cpr.pdf
@@ -141,21 +177,20 @@ module internal Helpers =
     let inRange a b x = a <= x && x <= b
     let yearValid x = x |> inRange 0 99
     let controlValid x = x |> inRange 0 9999
-
     match yy |> yearValid, control |> controlValid with
-    | false, true -> Error InvalidYear
-    | true, false -> Error InvalidControl
-    | false, false -> Error InvalidYearAndControl
+    | false, true -> YearOfBirthError InvalidYear
+    | true, false -> YearOfBirthError InvalidControl
+    | false, false -> YearOfBirthError InvalidYearAndControl
     | true, true ->
       match yy, control with
-      | x, y when x |> inRange 0 99 && y |> inRange 0 3999 -> Ok <| 1900 + x
-      | x, y when x |> inRange 0 36 && y |> inRange 4000 4999 -> Ok <| 2000 + x
-      | x, y when x |> inRange 37 99 && y |> inRange 4000 4999 -> Ok <| 1900 + x
-      | x, y when x |> inRange 0 57 && y |> inRange 5000 8999 -> Ok <| 2000 + x
-      | x, y when x |> inRange 58 99 && y |> inRange 5000 8999 -> Ok <| 1800 + x
-      | x, y when x |> inRange 0 36 && y |> inRange 9000 9999 -> Ok <| 2000 + x
-      | x, y when x |> inRange 37 99 && y |> inRange 9000 9999 -> Ok <| 1900 + x
-      | _ -> Error InvalidYearAndControlCombination
+      | x, y when x |> inRange 0 99 && y |> inRange 0 3999 -> YearOfBirthSuccess <| 1900 + x
+      | x, y when x |> inRange 0 36 && y |> inRange 4000 4999 -> YearOfBirthSuccess <| 2000 + x
+      | x, y when x |> inRange 37 99 && y |> inRange 4000 4999 -> YearOfBirthSuccess <| 1900 + x
+      | x, y when x |> inRange 0 57 && y |> inRange 5000 8999 -> YearOfBirthSuccess <| 2000 + x
+      | x, y when x |> inRange 58 99 && y |> inRange 5000 8999 -> YearOfBirthSuccess <| 1800 + x
+      | x, y when x |> inRange 0 36 && y |> inRange 9000 9999 -> YearOfBirthSuccess <| 2000 + x
+      | x, y when x |> inRange 37 99 && y |> inRange 9000 9999 -> YearOfBirthSuccess <| 1900 + x
+      | _ -> YearOfBirthError InvalidYearAndControlCombination
 
   /// <summary>
   /// Determines the <see cref="Gender"/> of a person based on a given digit
@@ -163,38 +198,67 @@ module internal Helpers =
   /// <param name="x">The digit to determine the <see cref="Gender"/> on</param>
   let getGender x = if (x |> toInt) % 2 = 0 then Female else Male
 
+  let validateDigitsAndDash first last ssn =
+    let length = last - first + 1
+    match length with 
+    | 10 -> (ssn |> allInts first last, true)
+    | 11 -> ((ssn |> allInts first (first + 5)) && ssn |> allInts (first + 7) last, ssn.[first + 6] = '-')
+    | _ -> (false, false)
+
   /// <summary>
   /// Represents the outcome of a validation attempt
   /// </summary>
-  type ValidationResult =
-  | Ok of int*int*int     // first non-space character position, last ditto and control number
-  | Error of ErrorReason
+  type Validation =
+  | ValidationSuccess of int*int*int*Gender     // dd, mm, yy, controlCode, gender
+  | ValidationError of ErrorReason
+  
+  let isMonthValid mm = 1 <= mm && mm <= 12
+  let repairDayInMonth' repairDayInMonth dd =
+    if 61 <= dd && repairDayInMonth then dd - 60 else dd
 
-  let validate' useModula11Check ssn =
+  let isDayInMonthValid year mm dd = 
+    let daysInMonth = DateTime.DaysInMonth(year, mm)
+    1 <= dd && dd <= daysInMonth
+    
+  let getDDMMYYCC first repairDayInMonth dash ssn =
+    ssn |> getDD first |> repairDayInMonth' repairDayInMonth, ssn |> getMM first, ssn |> getYY first, ssn |> getControlCode first dash 
+
+  let getDDMMYYGender first repairDayInMonth dash ssn =
+    let dd, mm, yy, controlCode = ssn |> getDDMMYYCC first repairDayInMonth dash
+    if mm |> isMonthValid |> not then ValidationError InvalidMonth
+      else 
+        match getBirthYear yy controlCode with
+        | YearOfBirthSuccess year ->
+          if isDayInMonthValid year mm dd |> not then ValidationError InvalidDayInMonth
+          else ValidationSuccess (dd, mm, year, if controlCode % 2 = 0 then Female else Male)
+        | YearOfBirthError reason -> ValidationError reason
+
+  /// <summary>
+  /// Validates whether a given ssn is valid
+  /// </summary>
+  /// <param name="useModula11Check">Flag telling whether to perform the old modula 11 check</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair the day in month</param>
+  /// <param name="ssn">The ssn to be validated</param>
+  let validate' useModula11Check repairDayInMonth ssn =
     match getIndices ssn with
-    | Some first, Some last ->
-      let length = last-first+1
-      match length with 
-      | 10 ->
-        if ssn |> allInts first last |> not then Error NonDigitCharacters
-        else
-          if useModula11Check &&
-            ssn |> sumOfProduct [|first .. first + 9|] |> 
-              isModula11 |> not then Error Modula11CheckFail
-          else
-            Ok (first, last, ssn |> getControlCode first false)
-      | 11 ->
-        if ssn |> allInts first (first + 5) |> not || 
-          ssn |> allInts (first + 7) last |> not then Error NonDigitCharacters
-        else if ssn.[first + 6] <> '-' then Error NonDashCharacter
-        else 
-          if useModula11Check &&
-            ssn |> sumOfProduct [|for n in first .. first + 9 do yield if n - first <= 5 then n else n + 1|] |> 
-              isModula11 |> not then Error Modula11CheckFail
-          else 
-            Ok (first, last, ssn |> getControlCode first true)
-      | _ -> Error InvalidLength
-    | _ -> Error NullEmptyOrWhiteSpace
+    | Known (first, last) ->
+      match ssn |> validateDigitsAndDash first last with
+      | false, _ -> ValidationError NonDigitCharacters
+      | _, false -> ValidationError NonDashCharacter
+      | _ -> 
+        let dash = last - first + 1 = 11
+        match ssn |> getDDMMYYGender first repairDayInMonth dash with 
+        | ValidationSuccess (dd, mm, yy, gender) ->
+          if useModula11Check then 
+            let indices = 
+              if dash then [|for i in 0..9 do yield if i <= 5 then first + i else first + i + 1|]
+              else [|first..first+9|]
+            let ok = ssn |> sumOfProduct indices |> isModula11
+            if ok then ValidationSuccess (dd, mm, yy, gender)
+            else ValidationError Modula11CheckFail
+          else ValidationSuccess (dd, mm, yy, gender)
+        | ValidationError reason -> ValidationError reason
+    | _ -> ValidationError NullEmptyOrWhiteSpace
     
 /// <summary>
 /// Represents the outcome of a validation
@@ -204,10 +268,10 @@ type ValidationResult =
 | Error of ErrorReason                     // The validation failed
 
 /// https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf
-let validate useModula11Check ssn =
-  match ssn |> validate' useModula11Check with
-  | Helpers.Ok _ -> Ok
-  | Helpers.Error reason -> Error reason
+let validate useModula11Check repairDayInMonth ssn =
+  match ssn |> validate' useModula11Check repairDayInMonth with
+  | ValidationSuccess _ -> Ok
+  | ValidationError reason -> Error reason
 
 /// <summary>
 /// Represents the result of a valid validation result
@@ -228,23 +292,10 @@ type SSNResult =
 /// Computes the <see cref="SSNResult"/> 
 /// </summary>
 /// <param name="useModula11Check">Flag telling whether to utilize the modula 11 check</param>
-/// <param name="repairDateOfBirth">Tlag telling whether to repair day in month</param>
+/// <param name="repairDayInMonth">Tlag telling whether to repair day in month</param>
 /// <param name="ssn">The SSN string</param>
-let getPersonInfo useModula11Check repairDateOfBirth ssn =
-  match ssn |> validate' useModula11Check with
-  | Helpers.Ok (first, last, controlCode) ->
-    let (dd, mm, yy) = (ssn |> getDD first, ssn |> getMM first, ssn |> getYY first)
-    match getBirthYear yy controlCode with
-    | YearOfBirth.Ok year ->
-      if dd < 0 || 99 < dd then Error InvalidDayInMonth
-      else
-        if 31 < dd && repairDateOfBirth |> not then Error InvalidDayInMonth
-        else 
-          let dd' = if dd <= 31 then dd else dd-60
-          let daysInMonth = DateTime.DaysInMonth(year, mm)
-          if daysInMonth < dd' then Error InvalidDayInMonth
-          else 
-            let gender = ssn.[last] |> getGender
-            Ok {Gender = gender; DateOfBirth = DateTimeOffset(year, mm, dd', 0, 0, 0, TimeSpan.Zero)}
-    | YearOfBirth.Error reason -> Error reason 
-  | Helpers.Error reason -> Error reason
+let getPersonInfo useModula11Check repairDayInMonth ssn =
+  match ssn |> validate' useModula11Check repairDayInMonth with
+  | ValidationSuccess (dd, mm, year, gender) ->
+    Ok {Gender = gender; DateOfBirth = DateTimeOffset(year, mm, dd, 0, 0, 0, TimeSpan.Zero)}
+  | ValidationError reason -> Error reason

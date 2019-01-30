@@ -15,10 +15,10 @@ let getSSN (x: DateTimeOffset) dash (controlCode: NonNegativeInt) =
 
 [<Property>]
 [<Trait("Category", "Unit")>]
-let ``validate works``(x: DateTimeOffset, dash: bool, controlCode: NonNegativeInt, useModula11Check: bool) = 
+let ``validate works``(x: DateTimeOffset, dash: bool, controlCode: NonNegativeInt, useModula11Check: bool, repair: bool) = 
   let s, c = getSSN x dash controlCode
-  match s |> validate' useModula11Check with
-  | Ok _ ->
-    SSNDK.ValidationResult.Ok = (s |> validate useModula11Check)
-  | Error reason -> 
-    SSNDK.ValidationResult.Error reason = (s |> validate useModula11Check)
+  match s |> validate' useModula11Check repair with
+  | ValidationSuccess _ ->
+    SSNDK.ValidationResult.Ok = (s |> validate useModula11Check repair)
+  | ValidationError reason -> 
+    SSNDK.ValidationResult.Error reason = (s |> validate useModula11Check repair)
