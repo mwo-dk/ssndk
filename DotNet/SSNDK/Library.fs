@@ -198,12 +198,19 @@ module internal Helpers =
   /// <param name="x">The digit to determine the <see cref="Gender"/> on</param>
   let getGender x = if (x |> toInt) % 2 = 0 then Female else Male
 
+  /// <summary>
+  /// Validates that trimmed string contains only digits where expected as well as a dash
+  /// on the expected place - if expected
+  /// </summary>
+  /// <param name="first">First non-space positiion</param>
+  /// <param name="last">Last non-space position</param>
+  /// <param name="ssn">The ssn to be checked</param>
   let validateDigitsAndDash first last ssn =
     let length = last - first + 1
     match length with 
-    | 10 -> (ssn |> allInts first last, true)
-    | 11 -> ((ssn |> allInts first (first + 5)) && ssn |> allInts (first + 7) last, ssn.[first + 6] = '-')
-    | _ -> (false, false)
+    | 10 -> ssn |> allInts first last, true
+    | 11 -> (ssn |> allInts first (first + 5)) && ssn |> allInts (first + 7) last, ssn.[first + 6] = '-'
+    | _ -> false, false
 
   /// <summary>
   /// Represents the outcome of a validation attempt
@@ -212,17 +219,47 @@ module internal Helpers =
   | ValidationSuccess of int*int*int*Gender     // dd, mm, yy, controlCode, gender
   | ValidationError of ErrorReason
   
+  /// <summary>
+  /// Checks whether a month is valid
+  /// </summary>
+  /// <param name="mm"></param>
   let isMonthValid mm = 1 <= mm && mm <= 12
+
+  /// <summary>
+  /// Repairs the day in a month according to rules - if <paramref name="repairDayInMonth"/> is set
+  /// </summary>
+  /// <param name="repairDayInMonth">Flag telling whether to repair</param>
+  /// <param name="dd">The day to optionally repair</param>
   let repairDayInMonth' repairDayInMonth dd =
     if 61 <= dd && repairDayInMonth then dd - 60 else dd
 
+  /// <summary>
+  /// Validates whether a given day in given month is valid
+  /// </summary>
+  /// <param name="year">The year to check</param>
+  /// <param name="mm">The month to check - assumed between 1 and 12. Validated before invokation</param>
+  /// <param name="dd">The day to check</param>
   let isDayInMonthValid year mm dd = 
     let daysInMonth = DateTime.DaysInMonth(year, mm)
     1 <= dd && dd <= daysInMonth
     
+  /// <summary>
+  /// Fetches dd, mm, yy and cc of a trimmed ssn based on whether to repair or not
+  /// </summary>
+  /// <param name="first">First valid character position</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair day in month</param>
+  /// <param name="dash">Flag telling whether <paramref name="ssn"/> contains a dash</param>
+  /// <param name="ssn">The ssn to check</param>
   let getDDMMYYCC first repairDayInMonth dash ssn =
     ssn |> getDD first |> repairDayInMonth' repairDayInMonth, ssn |> getMM first, ssn |> getYY first, ssn |> getControlCode first dash 
 
+  /// <summary>
+  /// Fetches dd, mm, birth year and gender based on whether to repair or not
+  /// </summary>
+  /// <param name="first">First valid character position</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair day in month</param>
+  /// <param name="dash">Flag telling whether <paramref name="ssn"/> contains a dash</param>
+  /// <param name="ssn">The ssn to check</param>
   let getDDMMYYGender first repairDayInMonth dash ssn =
     let dd, mm, yy, controlCode = ssn |> getDDMMYYCC first repairDayInMonth dash
     if mm |> isMonthValid |> not then ValidationError InvalidMonth

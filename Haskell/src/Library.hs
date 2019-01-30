@@ -1,12 +1,12 @@
 module SsnDk(ErrorReason(..), allInts) where
 
 import Data.Char
-import Data.Time
 import Data.Time.Calendar
 
 -- Represents an error reason
 data ErrorReason =
     NullEmptyOrWhiteSpace               -- The value was null, empty or white space
+    | InvalidInput                      -- Generic invalid input
     | NonDigitCharacters                -- The value contained non-digit characters, where characters were expected
     | NonDashCharacter                  -- The value contained a non-dash character where a dash was expected
     | Modula11CheckFail                 -- The modula 11 check failed
@@ -19,24 +19,34 @@ data ErrorReason =
     | InvalidYearAndControlCombination  -- Essential unexpected error
     deriving (Show)
 
-getIndices' :: Int -> Maybe Int -> Maybe Int -> [Char] -> (Maybe Int, Maybe Int)
-getIndices' n first last [] = (first, last)
-getIndices' n first last (x:xs) =
-    if x == ' ' then
-        getIndices' (n+1) first last xs
+dash = '-'
+
+isDash :: Char -> Bool
+isDash x = x == dash
+
+isSpaceOrDash :: Char -> Bool
+isSpaceOrDash x = isSpace x || isDash x
+
+data CursorPair = Unknown | Known (Int, Int)
+    deriving(Show)
+
+getRange :: Int -> CursorPair -> [Char] -> CursorPair
+getRange _ cursors [] = cursors
+getRange n cursors [x] =
+    case cursors of
+        Known (first, _) -> 
+            if isSpace x then cursors
+            else Known (first, n)
+        _ -> Unknown
+getRange n cursors (x:xs) =
+    if isSpace x then getRange (n+1) cursors xs
     else 
-        if first == Nothing then getIndices' (n+1) (Just n) (Just n) xs
-        else getIndices' (n+1) first (Just n) xs
+        case cursors of
+            Known (first, _) -> getRange (n+1) (Known(first, n)) xs
+            _ -> getRange (n+1) (Known(n, n)) xs
 
-data IndexRange = Range (Int, Int) | NoRamge
-    deriving (Show)
-
-getIndices :: [Char] -> IndexRange
-getIndices x = 
-    case getIndices' 0 Nothing Nothing x of
-        (Just first, Just last) -> Range (first, last)
-        (_, _) -> NoRange
-
+getIndices :: [Char] -> CursorPair
+getIndices x = getRange 0 Unknown x
 
 allInts' :: Bool -> Int -> Int -> [Char] -> Bool
 allInts' False _ _ _ = False
@@ -68,14 +78,14 @@ sumOfProduct' acc _ [] = acc
 sumOfProduct' acc [x] [w] = addAndMul acc x w
 sumOfProduct' acc [x] (w:ws) = addAndMul acc x w
 sumOfProduct' acc (x:xs) [w] = 
-    if x == ' ' || x == '-' then sumOfProduct' acc xs [w]
+    if isSpaceOrDash x then sumOfProduct' acc xs [w]
     else addAndMul acc x w
 sumOfProduct' acc (x:xs) (w:ws) = 
-    if x == ' ' || x == '-' then sumOfProduct' acc xs ([w] ++ ws)
+    if isSpaceOrDash x then sumOfProduct' acc xs ([w] ++ ws)
     else sumOfProduct' (addAndMul acc x w) xs ws
 
 sumOfProduct :: [Char] -> SumOfProduct
-sumOfProduct x = sumOfProduct' NoResult x weights
+sumOfProduct x = sumOfProduct' NoSumOfProductResult x weights
 
 modula11Of :: Int -> Int
 modula11Of x = x `mod` 11
@@ -138,14 +148,16 @@ getBirthYear' yy controlCode
                                 | inRange 0 36 yy && inRange 9000 9999 controlCode = 2000 + yy
                                 | inRange 37 99 yy && inRange 9000 9999 controlCode = 1900 + yy
 
-data BirthYear = BirthYearSuccess Int | BirthYearError ErrorReason                                
-getBirthYear :: Int -> Int -> BirthYear
+data YearOfBirth = YearOfBirthSuccess Int | YearOfBirthError ErrorReason   
+    deriving(Show)
+
+getBirthYear :: Int -> Int -> YearOfBirth
 getBirthYear yy controlCode =
     case (inRange 0 99 yy, inRange 0 9999 controlCode) of
-        (True, True) -> BirthYearSuccess (getBirthYear' yy controlCode)
-        (False, True) -> BirthYearError InvalidYear
-        (True, False) -> BirthYearError InvalidControl
-        (False, False) -> BirthYearError InvalidYearAndControl
+        (False, True) -> YearOfBirthError InvalidYear
+        (True, False) -> YearOfBirthError InvalidControl
+        (False, False) -> YearOfBirthError InvalidYearAndControl
+        (True, True) -> YearOfBirthSuccess (getBirthYear' yy controlCode)
 
 data Gender = Male | Female
     deriving(Show)
@@ -153,55 +165,89 @@ data Gender = Male | Female
 getGender :: Int -> Gender
 getGender x = if x `mod` 2 == 0 then Female else Male
 
-data ValidationOutCome = ValidationOutComeSuccess (Int, Int, Int, Int, Gender) | ValidationOutComeError ErrorReason
+validateDigitsAndDash :: Int -> Int -> [Char] -> (Bool, Bool)
+validateDigitsAndDash first last ssn =
+    case last - first + 1 of
+        10 -> (allInts first last ssn, True)
+        11 -> (allInts first (first + 5) ssn && allInts (first + 7) last ssn, isDash (ssn!!6))
+        _ -> (False, False)
+
+data Validation = ValidationSuccess (Int, Int, Int, Gender) | ValidationError ErrorReason
     deriving(Show)
 
-validate' :: Bool -> [Char] -> ValidationOutCome 
-validate' useModula11Check ssn =
+isMonthValid :: Int -> Bool
+isMonthValid mm = inRange 1 12 mm
+
+repairDayInMonth' :: Bool -> IntValue -> IntValue
+repairDayInMonth' repairDayInMonth dd =
+    case dd of 
+        Value dd -> if 61 <= dd && repairDayInMonth then Value (dd - 60) else Value dd
+        _ -> NoValue
+
+isDayInMonthValid :: Int -> Int -> Int -> Bool
+isDayInMonthValid year mm dd =
+    inRange 1 (gregorianMonthLength (toInteger year) dd) dd
+
+
+data DDMMYYCC = DDMMYYCC (Int, Int, Int, Int) | NoDDMMYYCC
+getDDMMYYCC :: Int -> Bool  -> [Char] -> DDMMYYCC
+getDDMMYYCC first repairDayInMonth ssn =
+    case (repairDayInMonth' repairDayInMonth (getDD ssn), getMM ssn, getYY ssn, getControlCode ssn) of
+        (Value dd, Value mm, Value yy, Value cc) -> DDMMYYCC(dd, mm, yy, cc)
+        _ -> NoDDMMYYCC
+
+getDDMMYYGender :: Int -> Bool  -> [Char] -> Validation
+getDDMMYYGender first repairDayInMonth ssn =
+    case (getDDMMYYCC first repairDayInMonth ssn) of 
+        DDMMYYCC(dd, mm, yy, controlCode) ->
+            if not (isMonthValid dd) then ValidationError InvalidMonth
+            else 
+                case getBirthYear yy controlCode of
+                    YearOfBirthSuccess year -> 
+                        if not(isDayInMonthValid year mm dd) then ValidationError InvalidDayInMonth
+                        else ValidationSuccess (dd, mm, year, getGender controlCode)
+                    YearOfBirthError reason -> ValidationError reason
+        _ -> ValidationError InvalidInput
+
+validate' :: Bool -> Bool -> [Char] -> Validation
+validate' useModula11Check repairDayInMonth ssn =
     case getIndices ssn of
-        Range (first, last) ->
-            let length = last - first + 1
-                in
-                    if length == 10 || length == 11 then
-                        if not (allInts first last ssn) then ValidationOutComeError NonDigitCharacters
-                        else
-                            case (getDD ssn, getMM ssn, getYY ssn, getControlCode ssn) of
-                                (Value dd, Value mm, Value yy, Value controlCode) ->
-                                    if mm < 1 || 12 < mm then ValidationOutComeError InvalidMonth
-                                    else 
-                                        if useModula11Check then
-                                            case sumOfProductOf ssn of
-                                                SumOfProductResult n -> 
-                                                    if not(isModula11 n) then ValidationOutComeError Modula11CheckFail
-                                                    else ValidationOutComeSuccess (dd, mm, yy, controlCode, getGender controlCode)
-                                                _ -> ValidationOutComeError Modula11CheckFail
-                                        else ValidationOutComeSuccess (dd, mm, yy, controlCode, getGender controlCode)
-                    else  ValidationOutComeError InvalidLength
-        _ -> ValidationOutComeError NullEmptyOrWhiteSpace
+        Known (first, last) ->
+            case validateDigitsAndDash first last ssn of
+                (False, _) -> ValidationError NonDigitCharacters
+                (_, False) -> ValidationError NonDashCharacter
+                _ ->
+                    case getDDMMYYGender first repairDayInMonth ssn of
+                        ValidationSuccess (dd, mm, yy, gender) ->
+                            if useModula11Check then
+                                case sumOfProduct ssn of
+                                    SumOfProductResult value -> 
+                                        if isModula11 value then ValidationSuccess (dd, mm, yy, gender)
+                                        else ValidationError Modula11CheckFail
+                                    NoSumOfProductResult -> ValidationError Modula11CheckFail
+                            else ValidationSuccess (dd, mm, yy, gender)
+                        ValidationError reason -> ValidationError reason
+        _ -> ValidationError NullEmptyOrWhiteSpace
 
-data ValidationResult = ValidationResultSuccess | ValidationResultError ErrorReason
+data ValidationResult = Valid | Invalid ErrorReason
     deriving(Show)
 
-validate :: Bool -> [Char] -> ValidationResult
-validate useModula11Check ssn =
-    case validate' useModula11Check ssn of
-        ValidationOutComeSuccess _ -> ValidationResultSuccess
-        ValidationOutComeError reason -> ValidationResultError reason
+validate :: Bool -> Bool -> [Char] -> ValidationResult
+validate useModula11Check repairDayInMonth ssn =
+    case validate' useModula11Check repairDayInMonth ssn of
+        ValidationSuccess _ -> Valid
+        ValidationError reason -> Invalid reason
 
-data Person = Person (Gender, DateTime)
-    deriving(Show)
+data PersonInfo = PersonInfo {
+    gender :: Gender,
+    dateOfBirth :: Day
+} deriving(Show)
 
-data SSNResult = SSNResultSuccess Person | SSNResultError ErrorReason
+data SSNResult = Success PersonInfo | Failure ErrorReason
 
 getPersonInfo :: Bool -> Bool -> [Char] -> SSNResult
-getPersonInfo useModula11Check repairDateOfBirth ssn =
-    case validate' useModula11Check ssn of
-        ValidationOutComeSuccess (dd, mm, yy, controlCode, gender) ->
-            case getBirthYear yy controlCode of
-                BirthYearSuccess year ->
-                    if 31 < dd && not(repairDateOfBirth) then SSNResultError InvalidDayInMonth
-                    else
-                        if gregorianMonthLength yy mm < (if dd <= 31 then dd else dd-60) then SSNResultError InvalidDayInMonth
-                        else SSNResultSuccess Person(gender, DateTime(year, if dd <= 31 then dd else dd-60, mm))
-                BirthYearError reason -> SSNResultError reason
-        ValidationOutComeError reason -> SSNResultError reason
+getPersonInfo useModula11Check repairDayInMonth ssn =
+    case validate' useModula11Check repairDayInMonth ssn of
+        ValidationSuccess (dd, mm, year, gender) ->
+            Success PersonInfo {gender = gender, dateOfBirth = fromGregorian (toInteger year) mm dd}
+        ValidationError reason -> Failure reason
