@@ -22,10 +22,6 @@
     <None Include="..\MIT.md" Pack="true" PackagePath="LICENSE.md" />
 
   </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.2" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.6.0" />
