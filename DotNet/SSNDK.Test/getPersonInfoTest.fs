@@ -23,15 +23,15 @@ let ``getPersonInfo works``(x: DateTimeOffset, dash: bool, controlCode: NonNegat
   let s, c = getSSN x dash repairDay controlCode
   let yearOk x y =
     match getBirthYear (y%100) c with
-    | YearOfBirth.Ok y -> x = y
+    | YearOfBirthSuccess y -> x = y
     | _ -> false
   match s |> getPersonInfo useModula11Check repairDay with
   | SSNDK.SSNResult.Ok p ->
-    let isValid = SSNDK.ValidationResult.Ok = (s |> validate useModula11Check) 
+    let isValid = SSNDK.ValidationResult.Ok = (s |> validate useModula11Check repairDay) 
     let genderOk = p.Gender = getGender (s.[s.Length - 1])
     let dayOk = p.DateOfBirth.Day = x.Day 
     let monthOk = p.DateOfBirth.Month = x.Month
     let yearOk = yearOk (p.DateOfBirth.Year) (x.Year)
     isValid && genderOk && dayOk && monthOk && yearOk
   | SSNDK.SSNResult.Error reason -> 
-    SSNDK.ValidationResult.Error reason = (s |> validate useModula11Check)
+    SSNDK.ValidationResult.Error reason = (s |> validate useModula11Check repairDay)

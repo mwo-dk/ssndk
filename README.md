@@ -2,7 +2,7 @@
 
 A minor package that helps working with danish social security numbers. The library is written in F#, but convenient C#-friendly extensions have been provided as well.
 
-Simply install the package ssndk from [nuget.org](https://www.nuget.org/packages/SSNDK)
+For .Net utilization, simply install the package ssndk from [nuget.org](https://www.nuget.org/packages/SSNDK). Haskell source code is also available - perhabs a package will be deployed on [hackage](https://hackage.haskell.org/)
 
 Danish social security numbers are strings, that usually are represented as either ```DDMMYYNNNN``` or ```DDMMYY-NNNN```, where:
 
@@ -17,6 +17,7 @@ The package work on raw strings and exposes two functions:
 
 1. ```validate: bool -> string -> ValidationResult```, performs simple validation of a given danish social security number. The arguments are:
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers.
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf)
 * ```ssn```, the social security number as a string.
 
   The outcome of the validation is represented by ```validationResult```
@@ -42,6 +43,7 @@ The package work on raw strings and exposes two functions:
   | Modula11CheckFail                  // The modula 11 check failed
   | InvalidLength                      // The trimmed range has invalid length
   | InvalidDayInMonth                  // The given day in the month is invalid
+  | InvalidMonth                       // The given month is invalid
   | InvalidYear                        // The year is invalid
   | InvalidControl                     // The control number is invalid
   | InvalidYearAndControl              // The year and control numbers are invalid
@@ -50,7 +52,7 @@ The package work on raw strings and exposes two functions:
 
 2. ```getPersonInfo: bool -> bool -> string -> SSNResult```, validates and upon successfull validation extracts person info (gender and date of birth) of the person, which the number represents. The arguments are:
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers.
-* ```repairDateOfBirth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf)
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf)
 * ```ssn```, the social security number as a string.
 
   The outcome is represented by ```SSNResult```

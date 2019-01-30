@@ -23,7 +23,7 @@ namespace SSNDKCSharp.Test
 
                 var p = IsYearOk(ok.Person.DateOfBirth.Year, x.Year, c);
 
-                var isValid = SSNDK.ValidationResult.Ok == SSNDK.validate(useModula11Check, sut);
+                var isValid = SSNDK.ValidationResult.Ok == SSNDK.validate(useModula11Check, repair, sut);
                 var c_ = sut[sut.Length - 1] - '0';
                 var genderOk = ok.Person.Gender == (c_ % 2 == 0 ? Gender.Female : Gender.Male);
                 var dayOk = ok.Person.DateOfBirth.Day == x.Day;
