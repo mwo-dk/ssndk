@@ -305,10 +305,29 @@ type ValidationResult =
 | Error of ErrorReason                     // The validation failed
 
 /// https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf
+
+/// <summary>
+/// Validates a given danish social security number
+/// </summary>
+/// <param name="useModula11Check">Flag telling whether to use modula 11 check or not</param>
+/// <param name="repairDayInMonth">Flag telling whether to repair day in month part of the
+/// birthday</param>
+/// <param name="ssn">The ssn to be checked</param>
 let validate useModula11Check repairDayInMonth ssn =
   match ssn |> validate' useModula11Check repairDayInMonth with
   | ValidationSuccess _ -> Ok
   | ValidationError reason -> Error reason
+
+/// <summary>
+/// Validates a given danish social security number in the good old boolean fashion
+/// <param name="useModula11Check">Flag telling whether to use modula 11 check or not</param>
+/// <param name="repairDayInMonth">Flag telling whether to repair day in month part of the
+/// birthday</param>
+/// <param name="ssn">The ssn to be checked</param>
+let isValid useModula11Check repairDayInMonth ssn =
+  match ssn |> validate' useModula11Check repairDayInMonth with 
+  | ValidationSuccess _ -> true
+  | _ -> false
 
 /// <summary>
 /// Represents the result of a valid validation result

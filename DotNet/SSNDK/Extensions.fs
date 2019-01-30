@@ -179,3 +179,15 @@ type StringExtensions() =
     match ssn |> getPersonInfo modula11Check  repair with
     | SSNResult.Ok person -> SSNOkResult(PersonInfo(person.Gender |> toGender, person.DateOfBirth))
     | SSNResult.Error reason -> reason |> toException |> raise
+  /// <summary>
+  /// Validates an SSN. Designed for C# pattern-match-like utilzation
+  /// </summary>
+  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 check. Defaults to fals</param>  
+  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defauls to true</param>
+  [<Extension>]
+  static member IsValid(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth)  =
+    let modula11Check = defaultArg useModula11Check false
+    let repair = defaultArg repairDayInMonth true
+    match ssn |> validate modula11Check repair with
+    | SSNDK.ValidationResult.Ok -> true
+    | _ -> false

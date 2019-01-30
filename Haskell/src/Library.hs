@@ -1,4 +1,4 @@
-module SsnDk(ErrorReason(..), ValidationResult(..), PersonInfo(..), SSNResult(..), validate, getPersonInfo) where
+module SsnDk(ErrorReason(..), ValidationResult(..), PersonInfo(..), SSNResult(..), validate, isValid, getPersonInfo) where
 
 import Data.Char
 import Data.Time.Calendar
@@ -242,6 +242,12 @@ data PersonInfo = PersonInfo {
     gender :: Gender,
     dateOfBirth :: Day
 } deriving(Show)
+
+isValid :: Bool -> Bool -> [Char] -> Bool
+isValid useModula11Check repairDayInMonth ssn =
+    case validate' useModula11Check repairDayInMonth ssn of
+        ValidationSuccess _ -> True
+        ValidationError reason -> False
 
 data SSNResult = Success PersonInfo | Failure ErrorReason
 

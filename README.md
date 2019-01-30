@@ -49,8 +49,12 @@ The package work on raw strings and exposes two functions:
   | InvalidYearAndControl              // The year and control numbers are invalid
   | InvalidYearAndControlCombination   // Essential unexpected error
   ```
+2. ```isValid: bool -> bool -> string -> bool```, simple yes/no validation of ssn
+* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers.
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf)
+* ```ssn```, the social security number as a string.
 
-2. ```getPersonInfo: bool -> bool -> string -> SSNResult```, validates and upon successfull validation extracts person info (gender and date of birth) of the person, which the number represents. The arguments are:
+3. ```getPersonInfo: bool -> bool -> string -> SSNResult```, validates and upon successfull validation extracts person info (gender and date of birth) of the person, which the number represents. The arguments are:
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers.
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf)
 * ```ssn```, the social security number as a string.
@@ -142,7 +146,6 @@ Four extension methods (for string) have been provided for (namespace: ```SSNDKC
 
   ```csharp
   using SSNDKCS;
-  using static SSNDKCS.ErrorReason;
 
   try
   {
@@ -162,7 +165,6 @@ Using this method is in the line of:
 
   ```csharp
   using SSNDKCS;
-  using static SSNDKCS.ErrorReason;
 
   try
   {
@@ -172,4 +174,19 @@ Using this method is in the line of:
   {
       // Log error or whatever
   }
+  ```
+
+  5. ```IsValid: string*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
+* ```ssn```, the social security number as a string.
+* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
+
+  Using this method is in the line of:
+
+  ```csharp
+  using SSNDKCS;
+
+  if (ssn.IsValid(useModula11Check)) 
+    // Go ahead...
+  else // go another head
   ```
