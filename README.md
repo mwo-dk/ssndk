@@ -86,6 +86,7 @@ Four extension methods (for string) have been provided for (namespace: ```SSNDKC
 1. ```Validate: string*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a typed result, that fits well with C# pattern matching. The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
 
   Using this method is in the line of:
 
@@ -110,7 +111,7 @@ Four extension methods (for string) have been provided for (namespace: ```SSNDKC
 2. ```GetPerson: string*Nullable<bool>*Nullable<bool> -> SSNResult```, utilizes ```getPersonInfo``` above and returns a typed result that fits well with C# pattern matching. The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
-* ```repairDateOfBirth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
 
   Using this method is in the line of:
 
@@ -135,6 +136,7 @@ Four extension methods (for string) have been provided for (namespace: ```SSNDKC
 3. ```ValidateAndThrow: string*Nullable<bool> -> ValidationOkResult```, utilizes ```validate``` above and returns a typed result, and throws an ```ArgumentException``` in case of error. The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
 
   Using this method is in the line of:
 
