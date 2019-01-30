@@ -21,6 +21,12 @@
     <Compile Include="getControlCodeTest.fs" />
     <Compile Include="getBirthYearTest.fs" />
     <Compile Include="getGenderTest.fs" />
+    <Compile Include="validateDigitsAndDashTest.fs" />
+    <Compile Include="isMonthValidTest.fs" />
+    <Compile Include="repairDayInMonth_Test.fs" />
+    <Compile Include="isDayInMonthValidTest.fs" />
+    <Compile Include="getDDMMYYCCTest.fs" />
+    <Compile Include="getDDMMYYGenderTest.fs" />
     <Compile Include="validate_Test.fs" />
     <Compile Include="validateTest.fs" />
     <Compile Include="getPersonInfoTest.fs" />
