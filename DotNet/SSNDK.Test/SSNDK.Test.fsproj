@@ -29,6 +29,7 @@
     <Compile Include="getDDMMYYGenderTest.fs" />
     <Compile Include="validate_Test.fs" />
     <Compile Include="validateTest.fs" />
+    <Compile Include="isValidTest.fs" />
     <Compile Include="getPersonInfoTest.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
