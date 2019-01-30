@@ -1,4 +1,4 @@
-module SsnDk(ErrorReason(..), allInts) where
+module SsnDk(ErrorReason(..), ValidationResult(..), PersonInfo(..), SSNResult(..), validate, getPersonInfo) where
 
 import Data.Char
 import Data.Time.Calendar
