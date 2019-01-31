@@ -19,7 +19,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                var ok = sut.GetPersonAndThrow(useModula11Check, repair);
+                var ok = sut.GetPersonAndThrow(useModula11Check, repair, ErrorTextLanguage.English);
 
                 var p = IsYearOk(ok.Person.DateOfBirth.Year, x.Year, c);
 
