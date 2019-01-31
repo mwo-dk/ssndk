@@ -19,7 +19,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrow(useModula11Check);
+                sut.ValidateAndThrow(useModula11Check, false, ErrorTextLanguage.English);
             }
             catch (ArgumentException error)
             {
@@ -41,7 +41,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrow(useModula11Check);
+                sut.ValidateAndThrow(useModula11Check, false, ErrorTextLanguage.English);
             }
             catch (ArgumentException error)
             {
@@ -63,7 +63,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrow(useModula11Check);
+                sut.ValidateAndThrow(useModula11Check, false, ErrorTextLanguage.English);
             }
             catch (ArgumentException error)
             {
