@@ -85,7 +85,7 @@ The package work on raw strings and exposes two functions:
   ```
 ## Usage C#
 
-Five extension methods (for string) have been provided for (namespace: ```SSNDKCS```):
+Six extension methods (for string) have been provided for (namespace: ```SSNDKCS```):
 
 1. ```Validate: string*Nullable<bool>*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a typed result, that fits well with C# pattern matching. The arguments are:
 * ```ssn```, the social security number as a string.
@@ -179,7 +179,7 @@ Using this method is in the line of:
   }
   ```
 
-  5. ```IsValid: string*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
+5. ```IsValid: string*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
@@ -200,7 +200,7 @@ Using this method is in the line of:
   else // go another head
   ```
 
-    ```IsValidEx: string*Nullable<bool>*Nullable<ErrorTextLanguage> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
+6. ```IsValidEx: string*Nullable<bool>*Nullable<ErrorTextLanguage> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
@@ -224,7 +224,7 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   ```
 
   A single extension method (for ErrorReason) have been provided for (namespace: ```SSNDKCS```):
-     ```ToText: ErrorReason -> string```, converts an ```ErrorReason``` to a ```string```. The arguments are:
+1. ```ToText: ErrorReason -> string```, converts an ```ErrorReason``` to a ```string```. The arguments are:
 * ```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
 SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
 
@@ -233,21 +233,13 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   ```csharp
   using SSNDKCS;
 
-  // If your care little about the error-reason, then is.
-  var (success, _) = ssn.IsValid(useModula11Check));
-  // Handle the boolean outcome of success, or...
-
-  var (success, reason) = ssn.IsValid(useModula11Check));
-
-  if (ssn.IsValid(useModula11Check)) 
-    // Go ahead...
-  else // go another head
+  // Gimme that reason then (ie from the field after calling Validate).
+  var errorText = ssn.IsValid(reason));
   ```
 
   Besides this a static class to 'ambient' setup of the error reporting language has been provided. The name is ```LanguageSettings``` (namespace: ```SSNDKCS```). The two methods are:
-      ```GetDefaultErrorLanguage: unit -> ErrorTextLanguage```, gets the default error reporting language. The argument is:
-* ```language```, flag telling which language to convert error messages to by default in the above mentioned extension methods for ```string``` and ```ErrorReason```
-       ```c: ErrorTextLanguage -> unit```, sets the default error reporting language. The argument is:
+1. ```GetDefaultErrorLanguage: unit -> ErrorTextLanguage```, gets the default error reporting language. sss
+2. ```SetDefaultErrorLanguage: ErrorTextLanguage -> unit```, sets the default error reporting language. The argument is:
 * ```language```, flag telling which language to convert error messages to by default in the above mentioned extension methods for ```string``` and ```ErrorReason```
 
   Using these methods is in the line of:
