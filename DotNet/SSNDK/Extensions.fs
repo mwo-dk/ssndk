@@ -270,6 +270,19 @@ type StringExtensions() =
     match ssn |> validate modula11Check repair with
     | SSNDK.ValidationResult.Ok -> (true, null)
     | SSNDK.ValidationResult.Error reason -> (false, reason |> (toErrorText lang))
+  /// <summary>
+  /// Extracts the person behind an SSN. Designed for C# tuple deconstruction
+  /// </summary>
+  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</param>
+  [<Extension>]
+  static member GetPersonEx(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth, [<Optional; DefaultParameterValue(ErrorTextLanguage.English)>] ?language) =
+    let modula11Check = defaultArg useModula11Check false
+    let repair = defaultArg repairDayInMonth true
+    let lang = defaultArg language (getDefaultErrorLanguage())
+    match ssn |> getPersonInfo modula11Check  repair with
+    | SSNResult.Ok person -> (true, null, PersonInfo(person.Gender |> toGender, person.DateOfBirth))
+    | SSNResult.Error reason -> (false, reason |> (toErrorText lang), Unchecked.defaultof<PersonInfo>)
 
 [<Extension>]
 type ErrorReasonExtensions() =

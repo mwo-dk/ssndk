@@ -85,7 +85,7 @@ The package work on raw strings and exposes two functions:
   ```
 ## Usage C#
 
-Six extension methods (for string) have been provided for (namespace: ```SSNDKCS```):
+Sven extension methods (for string) have been provided for (namespace: ```SSNDKCS```):
 
 1. ```Validate: string*Nullable<bool>*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a typed result, that fits well with C# pattern matching. The arguments are:
 * ```ssn```, the social security number as a string.
@@ -221,6 +221,25 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   if (ssn.IsValid(useModula11Check)) 
     // Go ahead...
   else // go another head
+  ```
+7. ```GetPersonEx: string*Nullable<bool>*Nullable<bool> -> SSNResult```, utilizes ```getPersonInfo``` above and returns a typed result that fits well with C# pattern matching. The arguments are:
+* ```ssn```, the social security number as a string.
+* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
+```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
+SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
+
+  Using this method is in the line of:
+
+   ```csharp
+  using SSNDKCS;
+
+  // If your care little about the error-reason, then is.
+  var (success, error, result) = ssn.GetPersonEx(useModula11Check));
+  if (success)
+    // Use that person
+  else 
+    // Don't use it. Log the error, or similar.
   ```
 
   A single extension method (for ErrorReason) have been provided for (namespace: ```SSNDKCS```):
