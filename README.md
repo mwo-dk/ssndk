@@ -85,9 +85,21 @@ The package work on raw strings and exposes two functions:
   ```
 ## Usage C#
 
-Sven extension methods (for string) have been provided for (namespace: ```SSNDKCS```):
+Besides the core F# library a group of extension methods have been provided for C# convenience. They are grouped as:
 
-1. ```Validate: string*Nullable<bool>*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a typed result, that fits well with C# pattern matching. The arguments are:
+* Extension methods for strings of social security numbers. There is basically two functionalities: simple yes/no validation and then methods to extract gender and date of birth. They come in various flavors depending on preferred usage pattern:
+  1. Return a ```System.ValueTuple``` denoting success and or error reasons and results.
+  2. Invoke, get result (if not just basic validation) and then throw an ```ArgumentException``` in case the validation fails.
+
+  These methods all take at least two boolean parameters, marking whether to perform the old modula 11 check as well as to repair the day in month of the birth date - see links below.
+* Extension method to format the error returned in either Danish or English.
+* Extension methods to handle default languages.
+
+### Extension methods for strings of Social Security Numbers
+
+Six extension methods (for string) have been provided for (namespace: ```SSNDKCS```):
+
+1. ```IsValid: string*Nullable<bool>*Nullable<bool> -> bool*ErrorReason```, utilizes ```validate``` above and returns a ```System.ValueTuple```, that fits well with C# [tuple deconstruction](https://docs.microsoft.com/en-us/dotnet/csharp/deconstruct). The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
@@ -96,53 +108,74 @@ Sven extension methods (for string) have been provided for (namespace: ```SSNDKC
 
   ```csharp
   using SSNDKCS;
-  using static SSNDKCS.ErrorReason;
 
-  switch (ssn.Validate(useModula11Check))
-  {
-      case ValidationOkResult ok:
-        // Do whatever in case of success
-        break;
-      case ValidationErrorResult dang:
-        var theReasonOfError = dang.Error;
-        if (theResonOfError == Modula11CheckFail) // Do whatever...
-        break;
-      default:
-        // Yikes
-  }
+  // If your care little about the error-reason, then is.
+  var (success, _) = ssn.IsValid(useModula11Check, repairDayInMonth);
+  // Handle the boolean outcome of success, or...
+
+  // If you need the error reason, then...
+  var (success, reason) = ssn.IsValid(useModula11Check, repairDayInMonth);
+  // Handle errors if success if false.
   ```
-
-2. ```GetPerson: string*Nullable<bool>*Nullable<bool> -> SSNResult```, utilizes ```getPersonInfo``` above and returns a typed result that fits well with C# pattern matching. The arguments are:
-* ```ssn```, the social security number as a string.
-* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
-* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
-
-  Using this method is in the line of:
+  
+  The error returned above is one of:
 
   ```csharp
-  using SSNDKCS;
-  using static SSNDKCS.ErrorReason;
-
-  switch (ssn.GetPerson(useModula11Check, repair))
+  public enum ErrorReason
   {
-      case SSNOkResult ok:
-        var person = ok.Person;
-        var gender = person.Gender;
-        var dateOfBirth = person.DateOfBirth;
-        // And on and on
-      case SSNErrorResult error:var theReasonOfError = dang.Error;
-        if (theResonOfError == Modula11CheckFail) // Do whatever...
-        break;
-      default:
-        // Yikes
+    Ok,
+    NullEmptyOrWhiteSpace,
+    NonDigitCharacters,
+    NonDashCharacter,
+    Modula11CheckFail,
+    InvalidLength,
+    InvalidDayInMonth,
+    InvalidMonth,
+    InvalidYear,
+    InvalidControl,
+    InvalidYearAndControl,
+    InvalidYearAndControlCombination
   }
   ```
-3. ```ValidateAndThrow: string*Nullable<bool>*Nullable<bool>*Nullable<ErrorTextLanguage> -> ValidationOkResult```, utilizes ```validate``` above and returns a typed result, and throws an ```ArgumentException``` in case of error. The arguments are:
+  As can be seen, it matches the similar union case in the F# implementation with an extre ```Ok``` (== 0) value, which is retuerned in case ```success``` is true.
+
+2. ```IsValidEx: string*Nullable<bool>*Nullable<bool>*Nullable<ErrorTextLanguage> -> bool*string```, utilizes ```validate``` above and returns a ```System.ValueTuple```, that fits well with C# [tuple deconstruction](https://docs.microsoft.com/en-us/dotnet/csharp/deconstruct). The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
 * ```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
 SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
+
+  Using this method is in the line of:
+
+  ```csharp
+  using SSNDKCS;
+
+  // If your care little about the error-reason, then is.
+  var (success, _) = ssn.IsValid(useModula11Check, repairDayInMonth);
+  // Handle the boolean outcome of success, or...
+
+  var (success, errorMessage) = ssn.IsValid(useModula11Check, repairDayInMonth);
+  // Log message if success is false - or somilar
+  ```
+
+  The error text language is one of:
+
+  ```csharp
+  public enum ErrorTextLanguage
+  {
+    English = 1,
+    Danish
+  }
+  ```
+
+3. ```ValidateAndThrowOnError: string*Nullable<bool>*Nullable<bool>*Nullable<ErrorTextLanguage> -> unit```, utilizes ```validate``` above, and throws an ```ArgumentException``` in case of validation failure. The arguments are:
+* ```ssn```, the social security number as a string.
+* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
+* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
+* ```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
+SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
+
   Using this method is in the line of:
 
   ```csharp
@@ -150,28 +183,7 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
 
   try
   {
-      var _ = ssn.ValidateAndThrow(useModula11Check);
-  }
-  catch (ArgumentException error)
-  {
-      // Log error or whatever
-  }
-  ```
-4. ```GetPersonAndThrow: string*Nullable<bool>*Nullable<bool>*Nullable<ErrorTextLanguage> -> SSNOkResult```, utilizes ```getPersonInfo``` above and returns a typed result that fits well with C# pattern matching. The arguments are:
-* ```ssn```, the social security number as a string.
-* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
-* ```repairDateOfBirth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
-```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
-SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
-
-Using this method is in the line of:
-
-  ```csharp
-  using SSNDKCS;
-
-  try
-  {
-      var result = ssn.GetPersonAndThrow(useModula11Check, repairDateOfBirth);
+      ssn.ValidateAndThrowOnError(useModula11Check, repairDayInMonth);
   }
   catch (ArgumentException error)
   {
@@ -179,7 +191,7 @@ Using this method is in the line of:
   }
   ```
 
-5. ```IsValid: string*Nullable<bool> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
+4. ```GetPerson: string*Nullable<bool>*Nullable<bool> -> bool*ErrorReason*Gender*DateTimeOffset```, utilizes ```getPersonInfo``` above and returns a ```System.ValueTuple```, that fits well with C# [tuple deconstruction](https://docs.microsoft.com/en-us/dotnet/csharp/deconstruct). The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
@@ -188,41 +200,26 @@ Using this method is in the line of:
 
   ```csharp
   using SSNDKCS;
+  using static SSNDKCS.ErrorReason;
 
-  // If your care little about the error-reason, then is.
-  var (success, _) = ssn.IsValid(useModula11Check));
-  // Handle the boolean outcome of success, or...
-
-  var (success, reason) = ssn.IsValid(useModula11Check));
-
-  if (ssn.IsValid(useModula11Check)) 
-    // Go ahead...
-  else // go another head
+  var (success, error, gender, dateOfBirth) = ssn.GetPerson(useModula11Check, repairDayInMonth);
+  if (success)
+    // Handle success case, error is Ok and gender and dateOfBirth have sensible values
+  else
+    // Inspect error and act accordingly
   ```
 
-6. ```IsValidEx: string*Nullable<bool>*Nullable<ErrorTextLanguage> -> ValidationResult```, utilizes ```validate``` above and returns a a ```bool```. The arguments are:
-* ```ssn```, the social security number as a string.
-* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
-* ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
-```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
-SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
-
-  Using this method is in the line of:
+  ```gender``` is of type ```Gender``` is a C# enumeration, matchin the F# union case above:
 
   ```csharp
-  using SSNDKCS;
-
-  // If your care little about the error-reason, then is.
-  var (success, _) = ssn.IsValid(useModula11Check));
-  // Handle the boolean outcome of success, or...
-
-  var (success, reason) = ssn.IsValid(useModula11Check));
-
-  if (ssn.IsValid(useModula11Check)) 
-    // Go ahead...
-  else // go another head
+  public enum Gender
+  {
+	  Male = 1,
+	  Female = 2
+  }
   ```
-7. ```GetPersonEx: string*Nullable<bool>*Nullable<bool> -> SSNResult```, utilizes ```getPersonInfo``` above and returns a typed result that fits well with C# pattern matching. The arguments are:
+
+5. ```GetPersonEx: string*Nullable<bool>*Nullable<bool> -> bool*string*Gender*DateTimeOffset```, utilizes ```getPersonInfo``` above and returns a ```System.ValueTuple```, that fits well with C# [tuple deconstruction](https://docs.microsoft.com/en-us/dotnet/csharp/deconstruct). The arguments are:
 * ```ssn```, the social security number as a string.
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
@@ -235,14 +232,37 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   using SSNDKCS;
 
   // If your care little about the error-reason, then is.
-  var (success, error, result) = ssn.GetPersonEx(useModula11Check));
+  var (success, errorMessage, gender, dateOfBirth) = ssn.GetPersonEx(useModula11Check));
   if (success)
     // Use that person
   else 
     // Don't use it. Log the error, or similar.
   ```
 
-  A single extension method (for ErrorReason) have been provided for (namespace: ```SSNDKCS```):
+6. ```GetPersonAndThrowOnError: string*Nullable<bool>*Nullable<bool>*Nullable<ErrorTextLanguage> -> Gender*DateTimeOffset```, utilizes ```getPersonInfo``` above and returns a ```System.ValueTuple```, that fits well with C# [tuple deconstruction](https://docs.microsoft.com/en-us/dotnet/csharp/deconstruct). The arguments are:
+* ```ssn```, the social security number as a string.
+* ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers. This is optional and defaults to ```false```
+* ```repairDateOfBirth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf). This is optional and defaults to ```true```
+```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
+SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
+
+  Using this method is in the line of:
+
+    ```csharp
+    using SSNDKCS;
+
+    try
+    {
+        var (gender, dateOfBirth) = ssn.GetPersonAndThrowOnError(useModula11Check, repairDateOfBirth);
+    }
+    catch (ArgumentException error)
+    {
+        // Log error or whatever
+    }
+    ```
+### Extension method for formatting errors
+
+A single extension method (for ErrorReason) have been provided for (namespace: ```SSNDKCS```):
 1. ```ToText: ErrorReason -> string```, converts an ```ErrorReason``` to a ```string```. The arguments are:
 * ```language```, flag telling which language to convert error messages to. If not provided, nor set via the static method
 SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
@@ -252,11 +272,13 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   ```csharp
   using SSNDKCS;
 
-  // Gimme that reason then (ie from the field after calling Validate).
+  // Gimme that reason then (ie from the field after calling Validate or others returning an ErrorReason).
   var errorText = ssn.IsValid(reason));
   ```
 
-  Besides this a static class to 'ambient' setup of the error reporting language has been provided. The name is ```LanguageSettings``` (namespace: ```SSNDKCS```). The two methods are:
+### Extension methods to setup default lanaguage formatting
+
+Besides this a static class to 'ambient' setup of the error reporting language has been provided. The name is ```LanguageSettings``` (namespace: ```SSNDKCS```). The two methods are:
 1. ```GetDefaultErrorLanguage: unit -> ErrorTextLanguage```, gets the default error reporting language. sss
 2. ```SetDefaultErrorLanguage: ErrorTextLanguage -> unit```, sets the default error reporting language. The argument is:
 * ```language```, flag telling which language to convert error messages to by default in the above mentioned extension methods for ```string``` and ```ErrorReason```

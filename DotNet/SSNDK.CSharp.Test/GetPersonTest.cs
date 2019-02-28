@@ -17,29 +17,26 @@ namespace SSNDKCSharp.Test
             var c = controlCode.Get % 10000;
             var sut = GetSSN(x, dash, repair, c);
 
-            switch (sut.GetPerson(useModula11Check, repair))
-            {
-                case SSNOkResult ok:
-                    var p = IsYearOk(ok.Person.DateOfBirth.Year, x.Year, c);
+            var (success, error, gender, dateOfBirth) = sut.GetPerson(useModula11Check, repair);
 
-                    var isValid = SSNDK.ValidationResult.Ok == SSNDK.validate(useModula11Check, repair, sut);
-                    var c_ = sut[sut.Length - 1]-'0';
-                    var genderOk = ok.Person.Gender == (c_ % 2 == 0 ? Gender.Female : Gender.Male);
-                    var dayOk = ok.Person.DateOfBirth.Day == x.Day;
-                    var monthOk = ok.Person.DateOfBirth.Month == x.Month;
-                    var yearOk = IsYearOk(ok.Person.DateOfBirth.Year, x.Year, c);
-                    return (isValid && genderOk && dayOk && monthOk && yearOk).ToProperty();
-                case SSNErrorResult error:
-                    switch (sut.Validate(useModula11Check))
-                    {
-                        case ValidationOkResult _: return false.ToProperty();
-                        case ValidationErrorResult error_:
-                            return (error.Error == error_.Error).ToProperty();
-                        default:
-                            return false.ToProperty();
-                    }
-                default:
-                    return false.ToProperty();
+            if (success)
+            {
+                var p = IsYearOk(dateOfBirth.Year, x.Year, c);
+
+                var isValid = SSNDK.ValidationResult.Ok == SSNDK.validate(useModula11Check, repair, sut);
+                var c_ = sut[sut.Length - 1] - '0';
+                var genderOk = gender == (c_ % 2 == 0 ? Gender.Female : Gender.Male);
+                var dayOk = dateOfBirth.Day == x.Day;
+                var monthOk = dateOfBirth.Month == x.Month;
+                var yearOk = IsYearOk(dateOfBirth.Year, x.Year, c);
+                return (isValid && genderOk && dayOk && monthOk && yearOk).ToProperty();
+            }
+            else
+            {
+                ErrorReason error_;
+                (success, error_) = sut.IsValid(useModula11Check);
+                if (success) return false.ToProperty();
+                else return (error == error_).ToProperty();
             }
         }
 
