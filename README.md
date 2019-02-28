@@ -13,7 +13,7 @@ Danish social security numbers are strings, that usually are represented as eith
 
 ## Usage
 
-The package work on raw strings and exposes two functions:
+The package works on raw strings and exposes two functions:
 
 1. ```validate: bool -> string -> ValidationResult```, performs simple validation of a given danish social security number. The arguments are:
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers.
@@ -49,7 +49,8 @@ The package work on raw strings and exposes two functions:
   | InvalidYearAndControl              // The year and control numbers are invalid
   | InvalidYearAndControlCombination   // Essential unexpected error
   ```
-2. ```isValid: bool -> bool -> string -> bool```, simple yes/no validation of ssn
+
+2. ```isValid: bool -> bool -> string -> bool```, simple yes/no validation of the social security number
 * ```useModula11Check```, boolean flag telling whether to perform the modula 11 check, that was required in older social security numbers.
 * ```repairDayInMonth```, boolean flag telling whether to repair the day in the month of the according to [this specification](https://www.cpr.dk/media/17535/erstatningspersonnummerets-opbygning.pdf)
 * ```ssn```, the social security number as a string.
@@ -87,8 +88,8 @@ The package work on raw strings and exposes two functions:
 
 Besides the core F# library a group of extension methods have been provided for C# convenience. They are grouped as:
 
-* Extension methods for strings of social security numbers. There is basically two functionalities: simple yes/no validation and then methods to extract gender and date of birth. They come in various flavors depending on preferred usage pattern:
-  1. Return a ```System.ValueTuple``` denoting success and or error reasons and results.
+* Extension methods for strings of social security numbers. There are basically two functionalities: simple yes/no validation and then methods to extract gender and date of birth. They come in two flavors:
+  1. Return a ```System.ValueTuple``` denoting success and or error reasons and optionally results.
   2. Invoke, get result (if not just basic validation) and then throw an ```ArgumentException``` in case the validation fails.
 
   These methods all take at least two boolean parameters, marking whether to perform the old modula 11 check as well as to repair the day in month of the birth date - see links below.
@@ -187,7 +188,8 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   }
   catch (ArgumentException error)
   {
-      // Log error or whatever
+      // Log error or whatever. If language is provided as last argument, the error message is formatted int that
+      // language. Else the default language is used.
   }
   ```
 
@@ -209,7 +211,7 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
     // Inspect error and act accordingly
   ```
 
-  ```gender``` is of type ```Gender``` is a C# enumeration, matchin the F# union case above:
+  ```gender``` is of type ```Gender``` a C# enumeration, matching the F# union case above:
 
   ```csharp
   public enum Gender
@@ -257,9 +259,11 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
     }
     catch (ArgumentException error)
     {
-        // Log error or whatever
+      // Log error or whatever. If language is provided as last argument, the error message is formatted int that
+      // language. Else the default language is used.
     }
     ```
+    
 ### Extension method for formatting errors
 
 A single extension method (for ErrorReason) have been provided for (namespace: ```SSNDKCS```):
