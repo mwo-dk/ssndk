@@ -232,7 +232,7 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   using SSNDKCS;
 
   // If your care little about the error-reason, then is.
-  var (success, errorMessage, gender, dateOfBirth) = ssn.GetPersonEx(useModula11Check));
+  var (success, errorMessage, gender, dateOfBirth) = ssn.GetPersonEx(useModula11Check);
   if (success)
     // Use that person
   else 
@@ -273,7 +273,7 @@ SSNDKCS.LanguageSettings.SetDefaultErrorLanguage, then it defaults to english
   using SSNDKCS;
 
   // Gimme that reason then (ie from the field after calling Validate or others returning an ErrorReason).
-  var errorText = ssn.IsValid(reason));
+  var errorText = ssn.ToText(reason);
   ```
 
 ### Extension methods to setup default lanaguage formatting
@@ -287,11 +287,12 @@ Besides this a static class to 'ambient' setup of the error reporting language h
 
   ```csharp
   using SSNDKCS;
+  using static SSNDKCS.LanguageSettings;
 
-  var thatDefaultLanguageIsSetTo = LanguageSettings.GetDefaultErrorLanguage()
+  var thatDefaultLanguageIsSetTo = GetDefaultErrorLanguage()
   /// .... and on and on
 
-  LanguageSettings.GetDefaultErrorLanguage(ErrorTextLanguage.Danish)
+  SetDefaultErrorLanguage(ErrorTextLanguage.Danish)
   ```
 
   Mind that, in non-typesafe-languges (ie. wrt enums) you can provide invalid values (like: ``` (ErrorTextLanguage)666```), and consecutively enjoy that things fail. We do not bother - if you do, all error messages will format to: ```"Hnnng? What language is that?"```, and like other features such as nullability, non-immutability, no discriminated unions etc, we pass on your freedom to enjoy. So: enjoy.
