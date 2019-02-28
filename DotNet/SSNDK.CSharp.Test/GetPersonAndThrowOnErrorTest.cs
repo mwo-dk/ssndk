@@ -7,7 +7,7 @@ using static SSNDKCSharp.Test.TestHelpers;
 
 namespace SSNDKCSharp.Test
 {
-    public class GetPersonAndThrowTest
+    public class GetPersonAndThrowOnErrorTest
     {
         [Property]
         [Trait("Category", "Unit")]
@@ -19,16 +19,17 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                var ok = sut.GetPersonAndThrow(useModula11Check, repair, ErrorTextLanguage.English);
+                var (gender, dateOfBirth) = 
+                    sut.GetPersonAndThrowOnError(useModula11Check, repair, ErrorTextLanguage.English);
 
-                var p = IsYearOk(ok.Person.DateOfBirth.Year, x.Year, c);
+                var p = IsYearOk(dateOfBirth.Year, x.Year, c);
 
                 var isValid = SSNDK.ValidationResult.Ok == SSNDK.validate(useModula11Check, repair, sut);
                 var c_ = sut[sut.Length - 1] - '0';
-                var genderOk = ok.Person.Gender == (c_ % 2 == 0 ? Gender.Female : Gender.Male);
-                var dayOk = ok.Person.DateOfBirth.Day == x.Day;
-                var monthOk = ok.Person.DateOfBirth.Month == x.Month;
-                var yearOk = IsYearOk(ok.Person.DateOfBirth.Year, x.Year, c);
+                var genderOk = gender == (c_ % 2 == 0 ? Gender.Female : Gender.Male);
+                var dayOk = dateOfBirth.Day == x.Day;
+                var monthOk = dateOfBirth.Month == x.Month;
+                var yearOk = IsYearOk(dateOfBirth.Year, x.Year, c);
                 return (isValid && genderOk && dayOk && monthOk && yearOk).ToProperty();
             }
             catch

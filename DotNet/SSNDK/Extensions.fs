@@ -135,115 +135,12 @@ module internal Helpers =
     | InvalidControl -> ArgumentException(reason |> toErrorText language, "x")
     | InvalidYearAndControl -> ArgumentException(reason |> toErrorText language, "x")
     | InvalidYearAndControlCombination -> ArgumentException(reason |> toErrorText language, "x")
-
-/// <summary>
-/// Base class for the outcome of a validation
-/// </summary>
-[<AbstractClass>]
-type ValidationResult(isOk: bool) =
-  member val IsOk = isOk
-  member val IsError = isOk |> not
-/// <summary>
-/// Represents a successfull validation
-/// </summary>
-[<Sealed>]
-type ValidationOkResult() =
-  inherit ValidationResult(true)
-/// <summary>
-/// Represents a failed validation
-/// </summary>
-[<Sealed>]
-type ValidationErrorResult(reason: ErrorReason) =
-  inherit ValidationResult(false)
-  member this.Error = reason
-  
-/// <summary>
-/// Represents the person behind an SSN 
-/// </summary>
-[<Struct>]
-type PersonInfo(gender: Gender, dateOfBirth: DateTimeOffset) =
-  member this.Gender = gender
-  member this.DateOfBirth = dateOfBirth
-    
-/// <summary>
-/// Base class for the result of extracting the person behind an SSN
-/// </summary>
-[<AbstractClass>]
-type SSNResult(isOk: bool) =
-  member val IsOk = isOk
-  member val IsError = isOk |> not
-/// <summary>
-/// Represents a successfull extraction of the person behind an SSN
-/// </summary>
-[<Sealed>]
-type SSNOkResult(person: PersonInfo) =
-  inherit SSNResult(true)
-  member this.Person = person
-/// <summary>
-/// Represents a failed extraction of the person behind an SSN
-/// </summary>
-[<Sealed>]
-type SSNErrorResult(reason: ErrorReason) =
-  inherit SSNResult(false)
-  member this.Error = reason
   
 /// <summary>
 /// Convenience extension for C# usage
 /// </summary>
 [<Extension>]
 type StringExtensions() =
-  /// <summary>
-  /// Validates an SSN. Designed for C# pattern-match-like utilzation
-  /// </summary>
-  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 check. Defaults to fals</param>  
-  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</param>
-  [<Extension>]
-  static member Validate(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth)  =
-    let modula11Check = defaultArg useModula11Check false
-    let repair = defaultArg repairDayInMonth true
-    match ssn |> validate modula11Check repair with
-    | SSNDK.ValidationResult.Ok -> ValidationOkResult() :> ValidationResult
-    | SSNDK.ValidationResult.Error reason -> ValidationErrorResult(reason |> toError) :> ValidationResult
-  /// <summary>
-  /// Extracts the person behind an SSN. Designed for C# pattern-match-like utilization
-  /// </summary>
-  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
-  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</param>
-  [<Extension>]
-  static member GetPerson(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth) =
-    let modula11Check = defaultArg useModula11Check false
-    let repair = defaultArg repairDayInMonth true
-    match ssn |> getPersonInfo modula11Check  repair with
-    | SSNResult.Ok person -> SSNOkResult(PersonInfo(person.Gender |> toGender, person.DateOfBirth)) :> SSNResult
-    | SSNResult.Error reason -> SSNErrorResult(reason |> toError) :> SSNResult
-  /// <summary>
-  /// Validates an SSN. Throws an <see cref="ArgumentException"/> upon failure
-  /// </summary>
-  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
-  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</param>
-  /// <param name="language">Flag telling in which language errors should be reported. Defaults to English< if not set by SetDefaultErrorLanguage/param>
-  [<Extension>]
-  static member ValidateAndThrow(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth, [<Optional; DefaultParameterValue(ErrorTextLanguage.English)>] ?language)  =
-    let modula11Check = defaultArg useModula11Check false
-    let repair = defaultArg repairDayInMonth true
-    let lang = defaultArg language (getDefaultErrorLanguage())
-    match ssn |> validate modula11Check repair with
-    | SSNDK.ValidationResult.Ok -> ValidationOkResult()
-    | SSNDK.ValidationResult.Error reason -> lang |> (toException reason) |> raise
-  /// <summary>
-  /// Extracts the person behind an SSN. Throws an <see cref="ArgumentException"/> upon failure
-  /// </summary>
-  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
-  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</>
-  /// <param name="language">Flag telling in which language errors should be reported. Defaults to English< if not set by SetDefaultErrorLanguage/param>
-  [<Extension>]
-  static member GetPersonAndThrow(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth, [<Optional; DefaultParameterValue(ErrorTextLanguage.English)>] ?language) =
-    let modula11Check = defaultArg useModula11Check false
-    let repair = defaultArg repairDayInMonth true
-    let lang = defaultArg language (getDefaultErrorLanguage())
-    match ssn |> getPersonInfo modula11Check  repair with
-    | SSNResult.Ok person -> SSNOkResult(PersonInfo(person.Gender |> toGender, person.DateOfBirth))
-    | SSNResult.Error reason -> lang |> (toException reason) |> raise
   /// <summary>
   /// Validates an SSN. Designed for C# tuple deconstruction
   /// </summary>
@@ -254,8 +151,9 @@ type StringExtensions() =
     let modula11Check = defaultArg useModula11Check false
     let repair = defaultArg repairDayInMonth true
     match ssn |> validate modula11Check repair with
-    | SSNDK.ValidationResult.Ok -> (true, ErrorReason.Ok)
-    | SSNDK.ValidationResult.Error reason -> (false, reason |> toError)
+    | SSNDK.ValidationResult.Ok -> struct (true, ErrorReason.Ok)
+    | SSNDK.ValidationResult.Error reason -> struct (false, reason |> toError)
+
   /// <summary>
   /// Validates an SSN. Designed for C# tuple deconstruction
   /// </summary>
@@ -268,8 +166,39 @@ type StringExtensions() =
     let repair = defaultArg repairDayInMonth true
     let lang = defaultArg language (getDefaultErrorLanguage())
     match ssn |> validate modula11Check repair with
-    | SSNDK.ValidationResult.Ok -> (true, null)
+    | SSNDK.ValidationResult.Ok -> struct (true, null)
     | SSNDK.ValidationResult.Error reason -> (false, reason |> (toErrorText lang))
+
+  /// <summary>
+  /// Validates an SSN. Throws an <see cref="ArgumentException"/> upon failure
+  /// </summary>
+  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</param>
+  /// <param name="language">Flag telling in which language errors should be reported. Defaults to English< if not set by SetDefaultErrorLanguage/param>
+  [<Extension>]
+  static member ValidateAndThrowOnError(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth, [<Optional; DefaultParameterValue(ErrorTextLanguage.English)>] ?language)  =
+    let modula11Check = defaultArg useModula11Check false
+    let repair = defaultArg repairDayInMonth true
+    let lang = defaultArg language (getDefaultErrorLanguage())
+    match ssn |> validate modula11Check repair with
+    | SSNDK.ValidationResult.Ok -> ()
+    | SSNDK.ValidationResult.Error reason -> lang |> (toException reason) |> raise
+
+  /// <summary>
+  /// Extracts the person behind an SSN. Designed for C# pattern-match-like utilization
+  /// </summary>
+  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</param>
+  [<Extension>]
+  static member GetPerson(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth) =
+    let modula11Check = defaultArg useModula11Check false
+    let repair = defaultArg repairDayInMonth true
+    match ssn |> getPersonInfo modula11Check  repair with
+    | SSNResult.Ok person -> 
+      struct (true, ErrorReason.Ok, person.Gender |> toGender, person.DateOfBirth)
+    | SSNResult.Error reason -> 
+      struct (false, reason |> toError, Unchecked.defaultof<Gender>, Unchecked.defaultof<DateTimeOffset>)
+
   /// <summary>
   /// Extracts the person behind an SSN. Designed for C# tuple deconstruction
   /// </summary>
@@ -281,8 +210,25 @@ type StringExtensions() =
     let repair = defaultArg repairDayInMonth true
     let lang = defaultArg language (getDefaultErrorLanguage())
     match ssn |> getPersonInfo modula11Check  repair with
-    | SSNResult.Ok person -> (true, null, PersonInfo(person.Gender |> toGender, person.DateOfBirth))
-    | SSNResult.Error reason -> (false, reason |> (toErrorText lang), Unchecked.defaultof<PersonInfo>)
+    | SSNResult.Ok person -> struct (true, null, person.Gender |> toGender, person.DateOfBirth)
+    | SSNResult.Error reason -> 
+      struct (false, reason |> (toErrorText lang), Unchecked.defaultof<Gender>, Unchecked.defaultof<DateTimeOffset>)
+
+  /// <summary>
+  /// Extracts the person behind an SSN. Throws an <see cref="ArgumentException"/> upon failure
+  /// </summary>
+  /// <param name="useModula11Check">Flag telling whether to utilize modula 11 cheeck. Defaults to false</param>
+  /// <param name="repairDayInMonth">Flag telling whether to repair the day in the month. Defaults to true</>
+  /// <param name="language">Flag telling in which language errors should be reported. Defaults to English< if not set by SetDefaultErrorLanguage/param>
+  [<Extension>]
+  static member GetPersonAndThrowOnError(ssn, [<Optional; DefaultParameterValue(false)>] ?useModula11Check, [<Optional; DefaultParameterValue(true)>] ?repairDayInMonth, [<Optional; DefaultParameterValue(ErrorTextLanguage.English)>] ?language) =
+    let modula11Check = defaultArg useModula11Check false
+    let repair = defaultArg repairDayInMonth true
+    let lang = defaultArg language (getDefaultErrorLanguage())
+    match ssn |> getPersonInfo modula11Check  repair with
+    | SSNResult.Ok person -> 
+      struct (person.Gender |> toGender, person.DateOfBirth)
+    | SSNResult.Error reason -> lang |> (toException reason) |> raise
 
 [<Extension>]
 type ErrorReasonExtensions() =

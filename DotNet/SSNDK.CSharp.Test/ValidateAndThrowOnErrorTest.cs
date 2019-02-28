@@ -8,7 +8,7 @@ using static SSNDKCSharp.Test.TestHelpers;
 
 namespace SSNDKCSharp.Test
 {
-    public class ValidateAndThrowTest
+    public class ValidateAndThrowOnErrorTest
     {
         [Property]
         [Trait("Category", "Unit")]
@@ -19,7 +19,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrow(useModula11Check, false, ErrorTextLanguage.English);
+                sut.ValidateAndThrowOnError(useModula11Check, false, ErrorTextLanguage.English);
             }
             catch (ArgumentException error)
             {
@@ -41,7 +41,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrow(useModula11Check, false, ErrorTextLanguage.English);
+                sut.ValidateAndThrowOnError(useModula11Check, false, ErrorTextLanguage.English);
             }
             catch (ArgumentException error)
             {
@@ -63,7 +63,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrow(useModula11Check, false, ErrorTextLanguage.English);
+                sut.ValidateAndThrowOnError(useModula11Check, false, ErrorTextLanguage.English);
             }
             catch (ArgumentException error)
             {
