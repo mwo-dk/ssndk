@@ -167,7 +167,7 @@ type StringExtensions() =
     let lang = defaultArg language (getDefaultErrorLanguage())
     match ssn |> validate modula11Check repair with
     | SSNDK.ValidationResult.Ok -> struct (true, null)
-    | SSNDK.ValidationResult.Error reason -> (false, reason |> (toErrorText lang))
+    | SSNDK.ValidationResult.Error reason -> struct (false, reason |> (toErrorText lang))
 
   /// <summary>
   /// Validates an SSN. Throws an <see cref="ArgumentException"/> upon failure
