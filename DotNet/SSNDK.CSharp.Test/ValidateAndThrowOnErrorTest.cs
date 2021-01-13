@@ -3,8 +3,8 @@ using System.Linq;
 using Xunit;
 using FsCheck;
 using FsCheck.Xunit;
-using SSNDKCS;
 using static SSNDKCSharp.Test.TestHelpers;
+using ssndk.CSharp;
 
 namespace SSNDKCSharp.Test
 {
@@ -19,7 +19,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrowOnError(useModula11Check, false, ErrorTextLanguage.English);
+                sut.ValidateAndThrowOnError(useModula11Check, false);
             }
             catch (ArgumentException error)
             {
@@ -41,7 +41,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrowOnError(useModula11Check, false, ErrorTextLanguage.English);
+                sut.ValidateAndThrowOnError(useModula11Check, false);
             }
             catch (ArgumentException error)
             {
@@ -63,7 +63,7 @@ namespace SSNDKCSharp.Test
 
             try
             {
-                sut.ValidateAndThrowOnError(useModula11Check, false, ErrorTextLanguage.English);
+                sut.ValidateAndThrowOnError(useModula11Check, false);
             }
             catch (ArgumentException error)
             {

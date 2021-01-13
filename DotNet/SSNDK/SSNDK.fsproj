@@ -1,21 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Authors>Michael W. Olesen</Authors>
-    <Company>-</Company>
-    <Description>A simple package to work with danish social security numbers</Description>
-    <Copyright>Michael W. Olesen</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>ssndk</AssemblyName>
+    <RootNamespace>ssndk</RootNamespace>
+    <Description>A simple package to work with danish social security numbers F#</Description>
     <PackageProjectUrl>https://github.com/mwo-dk/ssndk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mwo-dk/ssndk</RepositoryUrl>
-    <PackageTags>social security number danish</PackageTags>
+    <PackageTags>social security number danish F#</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Library.fs" />
-    <Compile Include="Extensions.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+    <PackageReference Update="FSharp.Core" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
