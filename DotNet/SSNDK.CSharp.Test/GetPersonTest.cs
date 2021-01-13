@@ -2,8 +2,8 @@
 using Xunit;
 using FsCheck;
 using FsCheck.Xunit;
-using SSNDKCS;
 using static SSNDKCSharp.Test.TestHelpers;
+using ssndk.CSharp;
 
 namespace SSNDKCSharp.Test
 {

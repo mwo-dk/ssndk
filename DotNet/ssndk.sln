@@ -1,13 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30803.129
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SSNDK", "SSNDK\SSNDK.fsproj", "{D2064125-BD9E-4CF1-BAC9-9F772DB31AEF}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SSNDK.Test", "SSNDK.Test\SSNDK.Test.fsproj", "{4F11E1CB-5329-49F8-9612-1ED01AEEB6A7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSNDK.CSharp.Test", "SSNDK.CSharp.Test\SSNDK.CSharp.Test.csproj", "{B31E106A-0A34-4DA7-86A6-E4D85DEE44AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{8B9BB756-0CF5-450A-B7D8-4AE84042DE79}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\build.yml = ..\.github\workflows\build.yml
+		Directory.Build.props = Directory.Build.props
+		..\.github\workflows\pr.yml = ..\.github\workflows\pr.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSNDK.CSharp", "SSNDK.CSharp\SSNDK.CSharp.csproj", "{CF9B5654-8721-4B14-9126-F93B1330949C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +64,18 @@ Global
 		{B31E106A-0A34-4DA7-86A6-E4D85DEE44AB}.Release|x64.Build.0 = Release|Any CPU
 		{B31E106A-0A34-4DA7-86A6-E4D85DEE44AB}.Release|x86.ActiveCfg = Release|Any CPU
 		{B31E106A-0A34-4DA7-86A6-E4D85DEE44AB}.Release|x86.Build.0 = Release|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Release|x64.Build.0 = Release|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF9B5654-8721-4B14-9126-F93B1330949C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
