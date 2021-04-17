@@ -1,7 +1,7 @@
 ﻿module allIntsTest
 
 open Xunit
-open SSNDK.Helpers
+open SSNDK.SSN
 open TestHelpers
 
 [<Fact>]

@@ -4,7 +4,7 @@ open System
 open Xunit
 open FsCheck
 open FsCheck.Xunit
-open SSNDK.Helpers
+open SSNDK.SSN
 
 [<Property>]
 [<Trait("Category", "Unit")>]
