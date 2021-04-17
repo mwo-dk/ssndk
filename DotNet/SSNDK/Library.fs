@@ -297,6 +297,20 @@ let getPersonInfo useModula11Check repairDayInMonth ssn =
   | Failure reason -> reason |> fail
 
 module CSharp =
+    
+    /// <summary>
+    /// Checks whether a given danish social security number is valid
+    /// </summary>
+    /// <param name="useModula11Check">Flag telling whether to use modula 11 check or not</param>
+    /// <param name="repairDayInMonth">Flag telling whether to repair day in month part of the
+    /// birthday</param>
+    /// <param name="ssn">The ssn to be checked</param>
+    [<CompiledName("IsValid")>]
+    let isValid useModula11Check repairDayInMonth ssn =
+        match validate useModula11Check repairDayInMonth ssn with
+        | Success _ -> true
+        | _ -> false
+
     /// <summary>
     /// Validates a given danish social security number
     /// </summary>
