@@ -20,4 +20,3 @@ jobs:
     - name: Deploy NuGet Packages
       run: |
         dotnet nuget push /home/runner/work/ssndk/ssndk/nuget/ssndk.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
-        dotnet nuget push /home/runner/work/ssndk/ssndk/nuget/ssndk.CSharp.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
