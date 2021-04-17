@@ -345,3 +345,17 @@ module CSharp =
             | Female -> Gender.Female
         let struct (dd, mm, year, gender) = ssn |> validate useModula11Check repairDayInMonth
         struct {| Gender = gender |> toEnumGender; DateOfBirth = DateTimeOffset(year, mm, dd, 0, 0, 0, TimeSpan.Zero) |}
+
+    [<Extension>]
+    type StringExtensions =
+        [<Extension>]
+        static member inline IsValid(x, useModula11Check, repairDayInMonth) =
+            x |> isValid useModula11Check repairDayInMonth
+
+        [<Extension>]
+        static member inline Validate(x, useModula11Check, repairDayInMonth) =
+            x |> validate useModula11Check repairDayInMonth
+
+        [<Extension>]
+        static member inline GetPersonInfo(x, useModula11Check, repairDayInMonth) =
+            x |> getPersonInfo useModula11Check repairDayInMonth
