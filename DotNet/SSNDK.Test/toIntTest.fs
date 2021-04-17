@@ -3,7 +3,7 @@
 open System
 open Xunit
 open FsCheck.Xunit
-open SSNDK.Helpers
+open SSNDK.SSN.Helpers
 open TestHelpers
 
 [<Fact>]

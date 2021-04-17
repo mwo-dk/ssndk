@@ -3,11 +3,11 @@
 open System
 open Xunit
 open FsCheck.Xunit
-open SSNDK.Helpers
+open SSNDK.SSN
 open TestHelpers
 
 [<Property>]
 [<Trait("Category", "Unit")>]
 let ``getDD works``(x: DateTimeOffset) = 
   let s = x |> formatDate
-  x.Day = (s |> getDD 0)
+  x.Day = getDD s

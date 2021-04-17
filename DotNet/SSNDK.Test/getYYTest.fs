@@ -3,11 +3,11 @@
 open System
 open Xunit
 open FsCheck.Xunit
-open SSNDK.Helpers
+open SSNDK.SSN
 open TestHelpers
 
 [<Property>]
 [<Trait("Category", "Unit")>]
 let ``getYY works``(x: DateTimeOffset) = 
   let s = x |> formatDate
-  (x.Year % 100) = (s |> getYY 0)
+  (x.Year % 100) = (s |> getYY)

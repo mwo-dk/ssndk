@@ -4,7 +4,7 @@ open System
 open Xunit
 open FsCheck
 open FsCheck.Xunit
-open SSNDK.Helpers
+open SSNDK.SSN.Helpers
 open TestHelpers
 
 [<Property>]
@@ -16,6 +16,6 @@ let ``getGender works``(x: DateTimeOffset, dash: bool, controlCode: NonNegativeI
   let lastDigit = s.[s.Length-1]
   let gender = lastDigit |> getGender
 
-  if c % 2 = 0 then gender = SSNDK.Gender.Female
-  else gender = SSNDK.Gender.Male
+  if c % 2 = 0 then gender = SSNDK.SSN.Gender.Female
+  else gender = SSNDK.SSN.Gender.Male
   
