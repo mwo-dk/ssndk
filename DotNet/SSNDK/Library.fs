@@ -269,7 +269,7 @@ let validate useModula11Check repairDayInMonth ssn =
 /// <param name="useModula11Check">Flag telling whether to use modula 11 check or not</param>
 /// <param name="repairDayInMonth">Flag telling whether to repair day in month part of the birthday</param>
 /// <param name="ssn">The ssn to be checked</param>
-[<CompiledName("IdValid")>]
+[<CompiledName("IsValid")>]
 let isValid useModula11Check repairDayInMonth ssn =
   match ssn |> validate useModula11Check repairDayInMonth with 
   | Success _ -> true
