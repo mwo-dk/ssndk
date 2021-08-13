@@ -344,7 +344,7 @@ module CSharp =
             | Male -> Gender.Male
             | Female -> Gender.Female
         let struct (dd, mm, year, gender) = ssn |> validate useModula11Check repairDayInMonth
-        struct {| Gender = gender |> toEnumGender; DateOfBirth = DateTimeOffset(year, mm, dd, 0, 0, 0, TimeSpan.Zero) |}
+        struct (gender |> toEnumGender, DateTimeOffset(year, mm, dd, 0, 0, 0, TimeSpan.Zero))
 
     [<Extension>]
     type StringExtensions =

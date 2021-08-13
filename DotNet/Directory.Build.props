@@ -7,7 +7,7 @@
     <Copyright>Copyright © 2019-2021 Michael W. Olesen</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>dingir.png</PackageIcon>
-    <BuildNumber>4.0.105</BuildNumber>
+    <BuildNumber>4.0.106</BuildNumber>
     <Version>$(BuildNumber).0</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
