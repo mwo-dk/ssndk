@@ -247,7 +247,7 @@ let validate useModula11Check repairDayInMonth ssn =
               else {0..10} |> Seq.fold (fun agg n -> agg && (if n = 6 then ssn.[n] = '-' else Char.IsDigit(ssn.[n]))) true
   if isBaseContentOk then
       match ssn |> getDDMMYYGender repairDayInMonth (ssn.Length = 11) with
-      | Success (yy, mm, dd, gender) ->
+      | Success (dd, mm, yy, gender) ->
           if useModula11Check then
               let digits = 
                   {0..ssn.Length-1} |>
