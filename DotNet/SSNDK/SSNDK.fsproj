@@ -9,20 +9,21 @@
     <RepositoryUrl>https://github.com/mwo-dk/ssndk</RepositoryUrl>
     <PackageTags>social security number danish F#</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TargetProfile>netstandard</TargetProfile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="6.0.1">
+      <GeneratePathProperty></GeneratePathProperty>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.1" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="ROP.fs" />
     <Compile Include="Library.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\MIT.md" Pack="true" PackagePath="LICENSE.md" />
-
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.0" />
-  </ItemGroup>
-
 </Project>
