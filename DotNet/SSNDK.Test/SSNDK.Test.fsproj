@@ -42,8 +42,4 @@
     <ProjectReference Include="..\SSNDK\SSNDK.fsproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.0" />
-  </ItemGroup>
-
 </Project>
