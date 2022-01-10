@@ -21,13 +21,13 @@ module internal Helpers =
   /// <summary>
   /// The space character
   /// </summary>
-  let space = ' '
+  let private space = ' '
 
   /// <summary>
   /// Determines if a given character is a space
   /// </summary>
   /// <param name="x">The character to categorize</param>
-  let inline isSpace x = x = space
+  let inline private isSpace x = x = space
 
   /// <summary>
   /// Represents a pair of cursors around a string, that needs to be trimmed
@@ -43,7 +43,7 @@ module internal Helpers =
   /// <param name="n"></param>
   /// <param name="cursors"></param>
   /// <param name="x"></param>
-  let rec getRange n cursors x = 
+  let rec private getRange n cursors x = 
     match x with
     | [] -> cursors
     | [x] ->
@@ -61,13 +61,15 @@ module internal Helpers =
         if x |> isSpace then getRange (n+1) Unknown xs
         else getRange (n+1) (Known struct (n, n)) xs
 
+  let private isNullOrWhiteSpace = String.IsNullOrWhiteSpace
+  let inline private toCharArray (x: string) = x.ToCharArray()
   /// <summary>
   /// Computes the range of valid character indices - instead of allocating new string when trimming
   /// </summary>
   /// <param name="x">The string to "trim"</param>
-  let getIndices x =
-    if String.IsNullOrWhiteSpace(x) then Unknown
-    else x.ToCharArray() |> List.ofArray |> getRange 0 Unknown
+  let internal getIndices x =
+    if x |> isNullOrWhiteSpace then Unknown
+    else x |> toCharArray |> List.ofArray |> getRange 0 Unknown
   
   /// <summary>
   /// Determines whether all characters in the provided string <paramref name="x"/> given by the
@@ -76,73 +78,73 @@ module internal Helpers =
   /// <param name="first">The index of the first character</param>
   /// <param name="last">The index of the last character</param>
   /// <param name="x">The string to check</param>
-  let allInts first last (x: string) =
+  let internal allInts first last (x: string) =
     {first..last} |> Seq.fold (fun acc n -> acc && Char.IsDigit(x.[n])) true
 
   /// <summary>
   /// The character '0' represented as integer
   /// </summary>
-  let zeroAsInt = int('0')
+  let internal zeroAsInt = int('0')
 
   /// <summary>
   /// Converts a digit character to its corresponding integer value
   /// </summary>
   /// <param name="x">The character to convert</param>
-  let toInt x = int x - zeroAsInt
+  let internal toInt x = int x - zeroAsInt
 
   /// <summary>
   /// The weights utilized for modula 11 checks
   /// </summary>
-  let weights = [|4;3;2;7;6;5;4;3;2;1|]
+  let internal weights = [|4;3;2;7;6;5;4;3;2;1|]
 
   /// <summary>
   /// Computes the sum of product (utilized to the modula 11 check) of the digits in
   /// the provided string - on the locations denoted by the given indices
   /// </summary>
   /// <param name="x">The string to work on</param>
-  let sumOfProduct (x: char array) =
+  let internal sumOfProduct (x: char array) =
     [|0..9|] |> Array.fold (fun acc n -> acc + weights.[n]*(toInt x.[n])) 0
   
   /// <summary>
   /// Computes modula 11 of a given integer
   /// </summary>
   /// <param name="x">The number to compute the modula 11 on</param>
-  let modula11Of x = x % 11
+  let internal modula11Of x = x % 11
 
   /// <summary>
   /// Checkes whether the provided number is modula 11
   /// </summary>
   /// <param name="x">The number to check</param>
-  let isModula11 x = 0 = (x |> modula11Of)
+  let internal isModula11 x = 0 = (x |> modula11Of)
   
   /// <summary>
   /// Reads a two-digit number
   /// </summary>
   /// <param name="offSet">The offset in the string</param>
   /// <param name="x">The source string</param>
-  let getTwoDigitNumber offSet (x:string) = 10*(toInt x.[offSet]) + (toInt x.[offSet + 1])
+  let internal getTwoDigitNumber offSet (x:string) = 10*(toInt x.[offSet]) + (toInt x.[offSet + 1])
 
   /// <summary>
   /// Extracts the raw 'dd' (day in month) of the birthday part of the string
   /// </summary>
-  let getDD = getTwoDigitNumber 0
+  let internal getDD = getTwoDigitNumber 0
 
   /// <summary>
   /// Extracts the raw 'mm' (month) of the birthday part of the string
   /// </summary>
-  let getMM = getTwoDigitNumber 2
+  let internal getMM = getTwoDigitNumber 2
 
   /// <summary>
   /// Extracts the raw 'y' (year) of the birthday part of the string
   /// </summary>
-  let getYY = getTwoDigitNumber 4
+  let internal getYY = getTwoDigitNumber 4
 
   /// <summary>
   /// Extracts the control value of the string
   /// </summary>
   /// <param name="hasDash">Flag telling whether there is a dash in the string</param>
   /// <param name="x">The source string</param>
-  let getControlCode hasDash (x: string) =
+  let internal getControlCode hasDash (x: string) =
     let offSet = if hasDash then 7 else 6
     [|offSet..offSet+3|] |> Array.fold (fun acc n -> 10*acc + (toInt x.[n])) 0  
 
@@ -152,7 +154,7 @@ module internal Helpers =
   /// </summary>
   /// <param name="yy">The 'yy' part from the SSN</param>
   /// <param name="control">The control character</param>
-  let getBirthYear yy control =
+  let internal getBirthYear yy control =
     let inRange a b x = a <= x && x <= b
     let yearValid x = x |> inRange 0 99
     let controlValid x = x |> inRange 0 9999
@@ -171,25 +173,24 @@ module internal Helpers =
         | x, y when x |> inRange 37 99 && y |> inRange 9000 9999 -> succeed <| 1900 + x
         | _ -> Exception($"Invalid year ({yy}) and control number ({control})") |> fail
       
-
   /// <summary>
   /// Determines the <see cref="Gender"/> of a person based on a given digit
   /// </summary>
   /// <param name="x">The digit to determine the <see cref="Gender"/> on</param>
-  let getGender x = if (x |> toInt) % 2 = 0 then Female else Male
+  let internal getGender x = if (x |> toInt) % 2 = 0 then Female else Male
     
   /// <summary>
   /// Checks whether a month is valid
   /// </summary>
   /// <param name="mm"></param>
-  let isMonthValid mm = 1 <= mm && mm <= 12
+  let internal isMonthValid mm = 1 <= mm && mm <= 12
 
   /// <summary>
   /// Repairs the day in a month according to rules - if <paramref name="repairDayInMonth"/> is set
   /// </summary>
   /// <param name="repairDayInMonth">Flag telling whether to repair</param>
   /// <param name="dd">The day to optionally repair</param>
-  let repairDayInMonth' repairDayInMonth dd = if 61 <= dd && repairDayInMonth then dd - 60 else dd
+  let internal repairDayInMonth' repairDayInMonth dd = if 61 <= dd && repairDayInMonth then dd - 60 else dd
 
   /// <summary>
   /// Validates whether a given day in given month is valid
@@ -197,7 +198,7 @@ module internal Helpers =
   /// <param name="year">The year to check</param>
   /// <param name="mm">The month to check - assumed between 1 and 12. Validated before invokation</param>
   /// <param name="dd">The day to check</param>
-  let isDayInMonthValid year mm dd = 
+  let internal isDayInMonthValid year mm dd = 
     let daysInMonth = DateTime.DaysInMonth(year, mm)
     1 <= dd && dd <= daysInMonth
     
@@ -207,7 +208,7 @@ module internal Helpers =
   /// <param name="repairDayInMonth">Flag telling whether to repair day in month</param>
   /// <param name="dash">Flag telling whether <paramref name="ssn"/> contains a dash</param>
   /// <param name="ssn">The ssn to check</param>
-  let getDDMMYYCC repairDayInMonth dash ssn =
+  let internal getDDMMYYCC repairDayInMonth dash ssn =
     ssn |> getDD |> repairDayInMonth' repairDayInMonth, ssn |> getMM, ssn |> getYY, ssn |> getControlCode dash 
 
   /// <summary>
@@ -216,7 +217,7 @@ module internal Helpers =
   /// <param name="repairDayInMonth">Flag telling whether to repair day in month</param>
   /// <param name="dash">Flag telling whether <paramref name="ssn"/> contains a dash</param>
   /// <param name="ssn">The ssn to check</param>
-  let getDDMMYYGender repairDayInMonth dash ssn =
+  let internal getDDMMYYGender repairDayInMonth dash ssn =
     let dd, mm, yy, controlCode = ssn |> getDDMMYYCC repairDayInMonth dash
     if mm |> isMonthValid |> not then Exception($"Invalid month ({mm})") |> fail
     else 
@@ -297,7 +298,6 @@ let getPersonInfo useModula11Check repairDayInMonth ssn =
   | Failure reason -> reason |> fail
 
 module CSharp =
-    
     /// <summary>
     /// Checks whether a given danish social security number is valid
     /// </summary>

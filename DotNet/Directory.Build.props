@@ -4,10 +4,10 @@
     <Company>Michael W. Olesen</Company>
     <Product>ssndk</Product>
     <Description>A simple package to work with danish social security numbers</Description>
-    <Copyright>Copyright © 2019-2021 Michael W. Olesen</Copyright>
+    <Copyright>Copyright © 2019-2022 Michael W. Olesen</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>dingir.png</PackageIcon>
-    <BuildNumber>4.0.108</BuildNumber>
+    <BuildNumber>4.0.109</BuildNumber>
     <Version>$(BuildNumber).0</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
