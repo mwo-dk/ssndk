@@ -1,0 +1,87 @@
+name: 'ssndk'
+
+trigger:
+- master
+- feat/*
+
+pr:
+- master
+- feat/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+  major: 4
+  minor: 1
+
+  majorMinor: ${{variables.major}}.${{variables.minor}}
+
+  ${{ if eq(variables['Build.SourceBranchName'], 'master')}}:
+    patch: $[counter(variables.majorMinor, 0)]
+    branchTag:
+    pushPackages: true
+
+  ${{ if ne(variables['Build.SourceBranchName'], 'master')}}:
+    patch: 0
+    branchPatch: $[counter(variables['Build.SourceBranchName'], 0)]
+    branchTag: -${{variables['build.sourcebranchname']}}.$(branchPatch)
+    pushPackages: ${{ne(variables['Build.Reason'], 'PullRequest')}}
+
+  version: $(majorMinor).$(patch)
+  semver: $(majorMinor).$(patch)$(branchTag)
+
+steps:
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core SDK'
+    inputs:
+      useGlobalJson: true
+
+  - task: NuGetAuthenticate@0
+    condition: succeeded()
+    displayName: 'NuGet Authenticate'
+
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      projects: |
+        **/*.csproj
+        **/*.fsproj
+        !examples/**
+      arguments: '-c $(buildConfiguration) /p:BuildNumber=$(version) /p:SemVer=$(semver)'
+
+  - task: DotNetCoreCLI@2
+    displayName: Test
+    inputs:
+      command: test
+      projects: 'DotNet/tst/**/*.csproj;tst/**/*.fsproj'
+      arguments: '--filter TraitName=Unit -c $(buildConfiguration) --no-build  /p:CollectCoverage=true /p:CoverletOutputFormat="json%2copencover%2ccobertura" /p:CoverletOutput=$(Build.SourcesDirectory)/coverage/ /p:MergeWith=$(Build.SourcesDirectory)/coverage/coverage.json'
+
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish Code Coverage Results '
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/coverage/coverage.cobertura.xml'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Create nuget packages'
+    inputs:
+      command: pack
+      arguments: '--output $(build.artifactstagingdirectory) --no-build /p:Configuration=Release /p:PackageVersion=$(semver)'
+      packagesToPack: 'DotNet/src/**/*.*sproj'
+      versioningScheme: 'byEnvVar'
+      versionEnvVar: 'version'
+      condition: succeeded()
+      displayName: Pack
+
+  - task: NuGetCommand@2
+    condition: and(succeeded(), eq(variables.pushPackages, true))
+    displayName: 'NuGet push'
+    inputs:
+      command: push
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: 'c6e499cb-2b45-4949-a673-12bcccb2c9b8/b469bc50-16fd-4c15-ad5b-3a9e8cc9d2c1'
+      allowPackageConflicts: true
