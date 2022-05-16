@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Core" Version="6.0.3">
+    <PackageReference Include="FSharp.Core" Version="6.0.4">
       <GeneratePathProperty></GeneratePathProperty>
     </PackageReference>
   </ItemGroup>
