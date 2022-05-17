@@ -1,26 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net48;net6.0</TargetFrameworks>
-    <AssemblyName>ssndk</AssemblyName>
-    <RootNamespace>ssndk</RootNamespace>
-    <Description>A simple package to work with danish social security numbers F#</Description>
-    <PackageProjectUrl>https://github.com/mwo-dk/ssndk</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/mwo-dk/ssndk</RepositoryUrl>
-    <PackageTags>social security number danish F#</PackageTags>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TargetProfile>netstandard</TargetProfile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net48;net6.0</TargetFrameworks>
+		<AssemblyName>ssndk</AssemblyName>
+		<RootNamespace>ssndk</RootNamespace>
+		<Description>A simple package to work with danish social security numbers F#</Description>
+		<PackageProjectUrl>https://github.com/mwo-dk/ssndk</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mwo-dk/ssndk</RepositoryUrl>
+		<PackageTags>social security number danish F#</PackageTags>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		
+		<TargetProfile>netstandard</TargetProfile>
+		
+		<MinVerMinimumMajorMinor>4.1</MinVerMinimumMajorMinor>
+		<MinVerVerbosity>diagnostic</MinVerVerbosity>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FSharp.Core" Version="6.0.4">
-      <GeneratePathProperty></GeneratePathProperty>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FSharp.Core" Version="6.0.4">
+			<GeneratePathProperty></GeneratePathProperty>
+		</PackageReference>
+		<PackageReference Include="MinVer" Version="4.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="ROP.fs" />
-    <Compile Include="Library.fs" />
-    <None Include="..\MIT.md" Pack="true" PackagePath="LICENSE.md" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="ROP.fs" />
+		<Compile Include="Library.fs" />
+		<None Include="..\MIT.md" Pack="true" PackagePath="LICENSE.md" />
+	</ItemGroup>
 </Project>
