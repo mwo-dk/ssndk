@@ -13,16 +13,16 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.300
-    - name: Set version based on repo
+    - name: Set PKG_VERSION based on repo
       run: |
         dotnet tool install -g minver-cli -v q
-        VERSION=`minver`
-        echo "Adding version to GITHUB_ENV: VERSION=$VERSION"
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        PKG_VERSION=`minver`
+        echo "Adding PKG_VERSION to GITHUB_ENV: PKG_VERSION=$PKG_VERSION"
+        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
     - name: Test
       run: dotnet test ./DotNet/ssndk.sln --configuration Release 
     - name: Build NuGet Packages
-      run: dotnet pack ./DotNet/SSNDK/SSNDK.fsproj --configuration Release -p:BuildNumber=$(version) -o ./nuget
+      run: dotnet pack ./DotNet/SSNDK/SSNDK.fsproj --configuration Release -p:BuildNumber=$(PKG_VERSION) -o ./nuget
     - name: Deploy NuGet Packages
       run: |
         dotnet nuget push /home/runner/work/ssndk/ssndk/nuget/ssndk.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
