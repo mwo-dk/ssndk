@@ -20,10 +20,6 @@
 		<PackageReference Include="FSharp.Core" Version="6.0.4">
 			<GeneratePathProperty></GeneratePathProperty>
 		</PackageReference>
-		<PackageReference Include="MinVer" Version="4.0.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>

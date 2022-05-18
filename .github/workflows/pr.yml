@@ -15,9 +15,14 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.300
+    - name: Output Run ID
+      run: echo ${{ github.run_id }}
+    - name: Output Run Number
+      run: echo ${{ github.run_number }}
+    - name: Output Run Attempt
+      run: echo ${{ github.run_attempt }}
     - name: Set PKG_VERSION based on repo
       run: |
-        dotnet tool install -g minver-cli -v q
         PKG_VERSION=`minver`
         echo "Adding PKG_VERSION to GITHUB_ENV: PKG_VERSION=$PKG_VERSION"
         echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
