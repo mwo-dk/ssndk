@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{
 		..\.github\workflows\pr.yml = ..\.github\workflows\pr.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSNDK.ConsoleTest", "SSNDK.ConsoleTest\SSNDK.ConsoleTest.csproj", "{50F959D6-06A0-40A8-A1DE-3240EC98E273}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSNDK.ConsoleTest", "SSNDK.ConsoleTest\SSNDK.ConsoleTest.csproj", "{50F959D6-06A0-40A8-A1DE-3240EC98E273}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
