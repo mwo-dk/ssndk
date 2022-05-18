@@ -11,9 +11,6 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		
 		<TargetProfile>netstandard</TargetProfile>
-		
-		<MinVerMinimumMajorMinor>4.1</MinVerMinimumMajorMinor>
-		<MinVerVerbosity>diagnostic</MinVerVerbosity>
 	</PropertyGroup>
 
 	<ItemGroup>
