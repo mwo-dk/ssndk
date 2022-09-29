@@ -30,14 +30,11 @@
 
   <ItemGroup>
     <PackageReference Include="FsCheck.Xunit" Version="2.16.5" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="FSharp.Core" Version="6.0.5">
-      <GeneratePathProperty></GeneratePathProperty>
     </PackageReference>
   </ItemGroup>
 
