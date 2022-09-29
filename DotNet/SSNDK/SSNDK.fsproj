@@ -14,12 +14,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FSharp.Core" Version="6.0.5">
-			<GeneratePathProperty></GeneratePathProperty>
-		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Compile Include="ROP.fs" />
 		<Compile Include="Library.fs" />
 		<None Include="..\MIT.md" Pack="true" PackagePath="LICENSE.md" />
