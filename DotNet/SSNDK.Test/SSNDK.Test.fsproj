@@ -9,19 +9,8 @@
 
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
-    <Compile Include="getIndicesTest.fs" />
-    <Compile Include="allIntsTest.fs" />
-    <Compile Include="toIntTest.fs" />
-    <Compile Include="sumOfProductTest.fs" />
     <Compile Include="modula11OfTest.fs" />
     <Compile Include="isModula11Test.fs" />
-    <Compile Include="getDDTest.fs" />
-    <Compile Include="getMMTest.fs" />
-    <Compile Include="getYYTest.fs" />
-    <Compile Include="getControlCodeTest.fs" />
-    <Compile Include="getGenderTest.fs" />
-    <Compile Include="isMonthValidTest.fs" />
-    <Compile Include="isDayInMonthValidTest.fs" />
     <Compile Include="getDDMMYYCCTest.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
