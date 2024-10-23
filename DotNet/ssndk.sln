@@ -11,7 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{
 	ProjectSection(SolutionItems) = preProject
 		..\.github\workflows\build.yml = ..\.github\workflows\build.yml
 		Directory.Build.props = Directory.Build.props
-		global.json = global.json
 		..\.github\workflows\pr-4.2.yml = ..\.github\workflows\pr-4.2.yml
 	EndProjectSection
 EndProject
